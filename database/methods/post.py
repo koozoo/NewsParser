@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from bot.database.main import async_session_maker
+from database.main import async_session_maker
 
 
 async def add_item(obj):

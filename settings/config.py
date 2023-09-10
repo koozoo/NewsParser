@@ -40,7 +40,7 @@ class RedisData(BaseModel):
 
 
 class AdminData(BaseModel):
-    id_: str
+    id_: int
     email: str
 
     def to_dict(self):
@@ -125,17 +125,17 @@ class Settings:
         open_ai_token = os.getenv("OPEN_AI_TOKEN")
         open_ai_organization = os.getenv("OPEN_AI_ORGANIZATION")
 
-        return TelegramParserData(open_ai_token=open_ai_token, open_ai_organization=open_ai_organization)
+        return OpenAiData(open_ai_token=open_ai_token, open_ai_organization=open_ai_organization)
 
-    def _get_config_web_parser(self):
+    def _get_config_web_parser(self) -> dict:
         return {}
 
-    def _get_admin(self):
+    def _get_admin(self) -> AdminData:
         admin_id = os.getenv("ADMIN_ID")
         admin_email = os.getenv("ADMIN_EMAIL")
-        return AdminData(id_=admin_id, admin_email=admin_email)
+        return AdminData(id_=admin_id, email=admin_email)
 
-    def get_settings(self):
+    def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),
                             redis=self._get_config_redis(),
                             bot=self._get_config_ui_bot_token(),

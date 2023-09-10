@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy import Column, BigInteger, String, Table, MetaData, TIMESTAMP
 from pydantic import BaseModel
-from bot.database.main import Base
+from database.main import Base
 
 metadata = MetaData()
 

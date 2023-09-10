@@ -4,27 +4,28 @@ import settings as config
 
 class RedisClient:
 
-    def __init__(self):
+    def __init__(self, db: int = 0):
 
         self.host = config.settings.redis.host
         self.port = config.settings.redis.port
         self.db = db
-        self.password = password
-        self.socket_timeout = socket_timeout
+        self.password = config.settings.redis.pass_
+        self.socket_timeout = None
 
     def _connect_redis(self):
         if self.password:
-            return redis.main(host=self.host,
-                              port=self.port,
-                              db=self.db,
-                              password=self.password,
-                              decode_responses=True)
+
+            return redis.Redis(host=self.host,
+                               port=self.port,
+                               db=self.db,
+                               password=self.password,
+                               decode_responses=True)
 
         else:
-            return redis.main(host=self.host,
-                              port=self.port,
-                              db=self.db,
-                              decode_responses=True)
+            return redis.Redis(host=self.host,
+                               port=self.port,
+                               db=self.db,
+                               decode_responses=True)
 
     async def create_listener_api_task(self):
         with self._connect_redis() as redis_cli:
@@ -35,7 +36,8 @@ class RedisClient:
 
     async def set_cache_all_user_by_channel_id(self, channel_id: int, data: str):
         with self._connect_redis() as redis_cli:
-            redis_cli.set(f"userchannel:{channel_id}", data)
+
+            await redis_cli.set(f"userchannel:{channel_id}", data)
 
         return await self.get_cache_all_user_by_channel_id(channel_id=channel_id)
 
@@ -46,7 +48,7 @@ class RedisClient:
 
     async def set_last_messages(self, channel_id: int, data: str):
         with self._connect_redis() as redis_cli:
-            redis_cli.set(f"messages:{channel_id}", data)
+            await redis_cli.set(f"messages:{channel_id}", data)
 
     async def get_last_messages(self, channel_id: int):
         with self._connect_redis() as redis_cli:

@@ -1,27 +1,22 @@
-from bot.database.methods.post import add_item_autoincrement, \
+from database.methods.post import add_item_autoincrement, \
     add_transaction_autoincrement
-from bot.database.methods.get import get_channel_by_id, \
+from database.methods.get import get_channel_by_id, \
     get_posts_by_channel_id, \
-    get_all_users_in_channel_by_cid, get_all_users, get_new_msg_by_cin
-from bot.database.methods.put import update_task_by_id, update_task_item_by_id, update_post_by_post_id
-from bot.database.models.channel import ChannelData, Channel
-from bot.database.models.posts import Post
-from bot.database.models.task_item import TaskItem
-from bot.database.models.user import UserData
-from bot.database.models.user_channel import UserChannel
-from bot.parser_data.utils import convert_dict_to_task_item
+    get_all_users, get_new_msg_by_cin
+from database.methods.put import update_task_by_id, update_task_item_by_id, update_post_by_post_id
+from database.models.channel import ChannelData, Channel
+from database.models.posts import Post
+from database.models.task_item import TaskItem, TaskItemData
+from database.models.user import UserData
 
 
 class Database:
 
-    def __init__(self, uid: int = None):
-        self.uid = uid
-
-    async def add_task_item(self, task_item: dict):
+    async def add_task_item(self, task_item: TaskItemData):
 
         return {"status": 200,
                 "task_item_id": int(await add_item_autoincrement(
-                    TaskItem(await convert_dict_to_task_item(task_item)))),
+                    TaskItem(task_item))),
                 "raw_data": task_item
                 }
 
@@ -50,9 +45,6 @@ class Database:
     async def add_users(self, users: list[UserData]):
         return await add_transaction_autoincrement(users)
 
-    async def add_user_channel(self, items: list[UserChannel]):
-        return await add_transaction_autoincrement(items)
-
     async def add_posts(self, items: list[Post]):
         return await add_transaction_autoincrement(items)
 
@@ -69,9 +61,6 @@ class Database:
 
     async def get_all_users(self):
         return await get_all_users()
-
-    async def get_all_users_in_channel(self, cid: int):
-        return await get_all_users_in_channel_by_cid(cid=cid)
 
     async def get_new_messages_by_channel_id(self, channel_id: int) -> dict:
         return {item.id: {
