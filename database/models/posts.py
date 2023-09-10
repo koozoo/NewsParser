@@ -1,6 +1,6 @@
-from sqlalchemy import Column, BigInteger, String, Table, MetaData, Integer
+from sqlalchemy import Column, BigInteger, String, Table, MetaData, Integer, Boolian
 from pydantic import BaseModel
-from bot.database.main import Base
+from database.main import Base
 
 metadata = MetaData()
 
@@ -8,27 +8,30 @@ metadata = MetaData()
 class PostData(BaseModel):
     channel_id: int
     message_id: int
+    title: str
     date: str
     text: str
     state: str
-    views_count: int
-    reactions_count: int = 0
-    comments_channel_id: int = 0
     type: str = "Text"
     id: int = 0
+    is_published: bool
+    modified_text: str
+    for_checking: bool
+
 
     def to_dict(self):
         return {
             "channel_id": self.channel_id,
             "message_id": self.message_id,
+            "title": self.title,
             "date": self.date,
             "text": self.text,
-            "state": self.state,
-            "views_count": self.views_count,
-            "reactions_count": self.reactions_count,
-            "comments_channel_id": self.comments_channel_id,
+            "state": self.state, # await(ожидает обработки текста), process(текст в обработке), done(modified_text готов)
             "type": self.type,
-            "id": self.id
+            "is_published": self.is_published,
+            "modified_text": self.modified_text,
+            "id": self.id,
+            "for_checking": self.for_checking # "отправить на проверку"
         }
 
 
@@ -39,22 +42,20 @@ class Post(Base):
         Column("id", BigInteger, primary_key=True),
         Column("channel_id", BigInteger, nullable=False),
         Column("message_id", BigInteger, nullable=False),
+        Column("title", String, nullable=False),
         Column("date", String, nullable=False),
         Column("type", String),
         Column("state", String, nullable=False),
         Column("text", String, nullable=False),
-        Column("reactions_count", Integer),
-        Column("views_count", Integer, nullable=False),
-        Column("comments_channel_id", BigInteger, nullable=False)
+        Column("modified_text", String),
+        Column("for_checking", Boolian, nullable=False),
     )
 
     def __init__(self, post: PostData):
         self.channel_id = post.channel_id
         self.message_id = post.message_id
+        self.title = post.title
         self.date = post.date
         self.type = post.type
         self.state = post.state
         self.text = post.text
-        self.reactions_count = post.reactions_count
-        self.views_count = post.views_count
-        self.comments_channel_id = post.comments_channel_id
