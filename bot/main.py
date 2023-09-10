@@ -2,7 +2,7 @@ import logging
 
 from aiogram import Dispatcher, Bot
 
-import settings as config
+from settings.config import settings
 from bot.handlers import register_handlers
 from scheduler.main import scheduler
 
@@ -17,7 +17,7 @@ async def _run_global_task():
 
 async def start_bot():
     # init logging
-    bot = Bot(token=config.settings.bot.token, parse_mode='HTML')
+    bot = Bot(token=settings.bot.token, parse_mode='HTML')
 
     dp = Dispatcher()
     await register_all_handlers(dp=dp)
