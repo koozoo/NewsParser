@@ -1,10 +1,10 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 def admin_menu():
     bts = {
-        "Добавить канал": "ADMIN_ADD_chanel",
+        "Добавить канал": "ADMIN_add_chanel",
         "Обновить данные": "ADMIN_UPDATE_data"
     }
 

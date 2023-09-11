@@ -3,34 +3,7 @@ from sqlalchemy.future import select
 from database.main import async_session_maker
 from database.models.channel import Channel
 from database.models.posts import Post
-from database.models.task import Task
-from database.models.task_item import TaskItem
 from database.models.user import User
-
-
-async def get_task_by_uid(uid: int, status: str = "create"):
-    async with async_session_maker() as s:
-        q = select(Task).filter(and_(Task.user_id == uid,
-                                     Task.status == status))
-        data = await s.execute(q)
-        curr = data.scalars()
-    return curr
-
-
-async def get_task_by_id(id: int):
-    async with async_session_maker() as s:
-        q = select(Task).filter(Task.id == id)
-        data = await s.execute(q)
-        curr = data.scalars()
-    return curr
-
-
-async def get_task_item_by_id(id: int):
-    async with async_session_maker() as s:
-        q = select(TaskItem).filter(TaskItem.id == id)
-        data = await s.execute(q)
-        curr = data.scalars()
-    return curr
 
 
 async def get_channel_by_id(cid: int):

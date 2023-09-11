@@ -10,10 +10,12 @@ async def cmd_start(message: Message):
     user_id = message.from_user.id
 
     if settings.admin.id_ == user_id:
-        await message.answer(f"Привет admin -> твой id: {user_id}",
+        await message.answer(f"Привет {message.from_user.full_name}.\n"
+                             f"Права доступа: Администратор",
                              reply_markup=admin_menu())
     else:
-        await message.answer(text=f"Привет user -> твой id: {user_id}",
+        await message.answer(text=f"Привет {message.from_user.full_name}.\n"
+                             f"Права доступа: Пользователь",
                              reply_markup=user_menu())
 
 

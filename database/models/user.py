@@ -1,19 +1,19 @@
-import datetime
+import datetime as dt
 
-from sqlalchemy import Column, BigInteger, String, Integer, Boolean, \
-    Table, MetaData, TIMESTAMP
+from sqlalchemy import Column, BigInteger, String, Boolean, \
+    Table, MetaData, TIMESTAMP, Integer
 from pydantic import BaseModel
-from bot.database.main import Base
+from database.main import Base
 
 
 class UserData(BaseModel):
     id: int
-    full_name: str = "null"
-    user_name: str = "null"
-    role: int = 1
+    name: str = "null"
     phone: str = "null"
     email: str = "null"
-    is_subscribed: bool = False
+    active_msg_id: int
+    is_admin: bool
+    update_at: dt.datetime = dt.datetime.utcnow()
 
 
 metadata = MetaData()
@@ -24,23 +24,21 @@ class User(Base):
         "user",
         metadata,
         Column("id", BigInteger, primary_key=True),
-        Column("role", Integer, nullable=False),
         Column("phone", String, nullable=False),
         Column("email", String, nullable=False),
-        Column("full_name", String, nullable=False),
-        Column("user_name", String, nullable=False),
-        Column("is_subscribed", Boolean, nullable=False),
-        Column("create_at", TIMESTAMP, default=datetime.datetime.utcnow(),
+        Column("name", String, nullable=False),
+        Column("is_admin", Boolean, nullable=False),
+        Column("active_msg_id", Integer, nullable=False),
+        Column("create_at", TIMESTAMP, default=dt.datetime.utcnow(),
                nullable=False),
-        Column("update_at", TIMESTAMP, default=datetime.datetime.utcnow(),
+        Column("update_at", TIMESTAMP, default=dt.datetime.utcnow(),
                nullable=False)
     )
 
     def __init__(self, user: UserData):
         self.id = user.id
-        self.role = user.role
-        self.full_name = user.full_name
+        self.name = user.name
         self.phone = user.phone
         self.email = user.email
-        self.user_name = user.user_name
-        self.is_subscribed = user.is_subscribed
+        self.is_admin = user.is_admin
+        self.active_msg_id = user.active_msg_id

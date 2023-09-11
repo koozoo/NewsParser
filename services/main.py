@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from database.methods.main import Database
 from redis_.main import RedisClient
-from .telegram_parser.main import TelegramParsing
+from .telegram_parser.main import TelegramParser
 
 
 class ServiceData(BaseModel):
@@ -26,4 +26,4 @@ class Service:
             return "type not found"
 
     async def _get_telegram_parser_tool(self):
-        telegram_pars_entity = TelegramParsing()
+        telegram_pars_entity = TelegramParser()

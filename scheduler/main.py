@@ -1,3 +1,3 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-
-scheduler = "from scheduller module"
+scheduler = AsyncIOScheduler(timezone="Europe/Moscow")

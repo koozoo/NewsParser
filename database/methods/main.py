@@ -3,31 +3,13 @@ from database.methods.post import add_item_autoincrement, \
 from database.methods.get import get_channel_by_id, \
     get_posts_by_channel_id, \
     get_all_users, get_new_msg_by_cin
-from database.methods.put import update_task_by_id, update_task_item_by_id, update_post_by_post_id
+from database.methods.put import update_post_by_post_id
 from database.models.channel import ChannelData, Channel
 from database.models.posts import Post
-from database.models.task_item import TaskItem, TaskItemData
 from database.models.user import UserData
 
 
 class Database:
-
-    async def add_task_item(self, task_item: TaskItemData):
-
-        return {"status": 200,
-                "task_item_id": int(await add_item_autoincrement(
-                    TaskItem(task_item))),
-                "raw_data": task_item
-                }
-
-    async def update_task(self, task_id: int, update_data: dict):
-
-        await update_task_by_id(task_id=task_id, data=update_data)
-
-    async def update_task_item(self, task_item_id: int, update_data: dict):
-
-        await update_task_item_by_id(task_item_id=task_item_id,
-                                     data=update_data)
 
     async def add_channel(self, channel_data: ChannelData, channel: Channel):
         new_id = int(await add_item_autoincrement(channel))

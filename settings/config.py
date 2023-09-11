@@ -62,11 +62,13 @@ class BotData(BaseModel):
 class TelegramParserData(BaseModel):
     api_hash: str
     api_id: str
+    max_update_post: int
 
     def to_dict(self):
         return {
             "api_hash,": self.api_hash,
-            "api_id": self.api_id
+            "api_id": self.api_id,
+            "max_update_post": self.max_update_post
         }
 
 
@@ -118,8 +120,9 @@ class Settings:
     def _get_config_parser_bot_token(self):
         api_hash = os.getenv("ParserBotApiHash")
         api_id = os.getenv("ParserBotApiId")
+        max_update_post = 50
 
-        return TelegramParserData(api_hash=api_hash, api_id=api_id)
+        return TelegramParserData(api_hash=api_hash, api_id=api_id, max_update_post=max_update_post)
 
     def _get_config_open_ai_token(self):
         open_ai_token = os.getenv("OPEN_AI_TOKEN")
