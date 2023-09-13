@@ -2,21 +2,13 @@ import logging
 from aiogram import Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
-from bot.keyboards.inline import admin_menu, user_menu
-from settings.config import settings
+from services.main import Service
 
 
 async def cmd_start(message: Message):
-    user_id = message.from_user.id
+    service_entity = Service()
 
-    if settings.admin.id_ == user_id:
-        await message.answer(f"Привет {message.from_user.full_name}.\n"
-                             f"Права доступа: Администратор",
-                             reply_markup=admin_menu())
-    else:
-        await message.answer(text=f"Привет {message.from_user.full_name}.\n"
-                             f"Права доступа: Пользователь",
-                             reply_markup=user_menu())
+    await service_entity.init_auth(context=message)
 
 
 async def register_commands_handler(dp: Dispatcher):

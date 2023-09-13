@@ -14,7 +14,6 @@ async def add_item(obj):
 
 async def add_item_autoincrement(obj):
     async with async_session_maker() as s:
-
         s.add(obj)
         await s.flush()
 

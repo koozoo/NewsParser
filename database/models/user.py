@@ -11,9 +11,31 @@ class UserData(BaseModel):
     name: str = "null"
     phone: str = "null"
     email: str = "null"
-    active_msg_id: int
-    is_admin: bool
+    active_msg_id: int = 0
+    is_admin: bool = False
     update_at: dt.datetime = dt.datetime.utcnow()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "phone": self.phone,
+            "email": self.email,
+            "active_msg_id": self.active_msg_id,
+            "is_admin": self.is_admin,
+            "update_at": self.update_at
+        }
+
+    @staticmethod
+    def dict_to_user_data(data: dict):
+
+        return UserData(id=data.get("id", 0),
+                        name=data.get("name", "Noname"),
+                        phone=data.get("phone", "none"),
+                        email=data.get("email", "none"),
+                        active_msg_id=data.get("active_msg_id", 0),
+                        is_admin=data.get("is_admin", False),
+                        update_at=data.get("update_at", dt.datetime.utcnow()))
 
 
 metadata = MetaData()

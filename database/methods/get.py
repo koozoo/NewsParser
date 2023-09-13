@@ -6,9 +6,25 @@ from database.models.posts import Post
 from database.models.user import User
 
 
+async def get_all_channels():
+    async with async_session_maker() as s:
+        q = select(Channel)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
 async def get_channel_by_id(cid: int):
     async with async_session_maker() as s:
         q = select(Channel).filter(Channel.id == cid)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_channel_by_link(link: int):
+    async with async_session_maker() as s:
+        q = select(Channel).filter(Channel.link == link)
         data = await s.execute(q)
         curr = data.scalars()
     return curr
@@ -25,6 +41,14 @@ async def get_posts_by_channel_id(cid: int):
 async def get_all_users():
     async with async_session_maker() as s:
         q = select(User)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_user_by_id(user_id: int):
+    async with async_session_maker() as s:
+        q = select(User).filter(User.id == user_id)
         data = await s.execute(q)
         curr = data.scalars()
     return curr

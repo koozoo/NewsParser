@@ -1,8 +1,13 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+
+
 from bot.keyboards.reply import yes_no
 from bot.handlers.utils import is_email
+from database.methods.main import Database
+from database.models.channel import ChannelData, Channel
+from scheduler.main import scheduler
 
 
 async def text_messages(query: str, **kwargs):
@@ -16,7 +21,8 @@ async def text_messages(query: str, **kwargs):
                              "Пример privat канала: https://t.me/+koUUZxSej2NjNDhi\n"
                              "Пример public канала: https://t.me/test_parser_news",
         "process_finish": f"🎉 Группа {kwargs.get('url', None)} успешно добавлена, в ближайшее время придут "
-                          "сообщения на модерацию."
+                          "сообщения на модерацию.",
+        "process_finish_error": f"Группа уже существует в базе. 🤷 "
 
     }
 
@@ -54,15 +60,23 @@ class InterfaceFsmUrl:
 
     @staticmethod
     async def process_finish(message: Message, state: FSMContext):
-
+        db = Database()
         answer = await state.update_data(answer=message.text.casefold())
         await InterfaceFsmUrl.delete_message(message)
 
         if answer.get('answer') == "да":
             data = await state.get_data()
-            # добавить в бд новый канал
-            await message.answer(text=await text_messages(query="process_finish", url=data.get('url')),
-                                 reply_markup=ReplyKeyboardRemove())
+
+            channel_data = ChannelData(link=data['url'])
+
+            if not await db.get_channel_by_link(link=data['url']):
+                scheduler.add_job(db.add_channel, kwargs={"channel_data": channel_data})
+
+                await message.answer(text=await text_messages(query="process_finish", url=data.get('url')),
+                                     reply_markup=ReplyKeyboardRemove())
+            else:
+                await message.answer(text=await text_messages(query="process_finish_error", url=data.get('url')),
+                                     reply_markup=ReplyKeyboardRemove())
             await state.clear()
         else:
             await state.set_state(UrlAction.url)

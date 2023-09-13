@@ -83,6 +83,13 @@ class OpenAiData(BaseModel):
         }
 
 
+class ProjectData(BaseModel):
+    main_url: str
+    support_group_url: str = None
+    group_for_marketing: str = None
+    contact_info: str = {}
+
+
 class SettingsData(BaseModel):
     redis: RedisData
     database_: DatabaseData
@@ -91,6 +98,7 @@ class SettingsData(BaseModel):
     web_parser: dict
     open_ai: OpenAiData
     admin: AdminData
+    project_const: ProjectData
 
 
 class Settings:
@@ -138,6 +146,9 @@ class Settings:
         admin_email = os.getenv("ADMIN_EMAIL")
         return AdminData(id_=admin_id, email=admin_email)
 
+    def _get_project_const(self) -> ProjectData:
+        return ProjectData(main_url="http://t.me")
+
     def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),
                             redis=self._get_config_redis(),
@@ -145,7 +156,8 @@ class Settings:
                             telegram_parser=self._get_config_parser_bot_token(),
                             web_parser=self._get_config_web_parser(),
                             open_ai=self._get_config_open_ai_token(),
-                            admin=self._get_admin())
+                            admin=self._get_admin(),
+                            project_const=self._get_project_const())
 
 
 settings = Settings().get_settings()
