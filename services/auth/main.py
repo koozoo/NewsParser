@@ -16,6 +16,9 @@ class Auth:
         self.database = Database()
         self.context = context
 
+    async def _check_session_message(self, message_id: int):
+        ...
+
     async def authorization(self):
         await self.context.delete()
         name = self.context.from_user.full_name

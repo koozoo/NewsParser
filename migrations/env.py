@@ -12,6 +12,7 @@ from database.models.user import metadata as user_metadata
 from database.models.posts import metadata as posts_metadata
 from database.models.modify_post import metadata as modify_post_metadata
 from database.models.channel import metadata as channel_metadata
+from database.models.media import metadata as media_metadata
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 
@@ -35,7 +36,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [user_metadata, posts_metadata, modify_post_metadata, channel_metadata]
+target_metadata = [user_metadata,
+                   posts_metadata,
+                   modify_post_metadata,
+                   channel_metadata,
+                   media_metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

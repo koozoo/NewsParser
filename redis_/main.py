@@ -14,7 +14,6 @@ class RedisClient:
 
     def _connect_redis(self):
         if self.password:
-
             return redis.Redis(host=self.host,
                                port=self.port,
                                db=self.db,
@@ -27,37 +26,26 @@ class RedisClient:
                                db=self.db,
                                decode_responses=True)
 
-    async def create_listener_api_task(self):
+    async def set_all_messages_id(self, channel_id: int,  data: list[int]):
         with self._connect_redis() as redis_cli:
-            listener = redis_cli.pubsub()
-            listener.subscribe("new_job_for::bot")
+            for post in data:
+                await redis_cli.rpush(f"messages_id:{channel_id}", post)
 
-            return listener
-
-    async def set_cache_all_user_by_channel_id(self, channel_id: int, data: str):
+    async def get_all_messages_id(self, channel_id: int):
         with self._connect_redis() as redis_cli:
-
-            await redis_cli.set(f"userchannel:{channel_id}", data)
-
-        return await self.get_cache_all_user_by_channel_id(channel_id=channel_id)
-
-    async def get_cache_all_user_by_channel_id(self, channel_id: int):
-        with self._connect_redis() as redis_cli:
-            data = redis_cli.get(f"userchannel:{channel_id}")
+            data = redis_cli.lrange(f"messages_id:{channel_id}", 0, -1)
             return data
 
-    async def set_last_messages(self, channel_id: int, data: str):
+    async def clean_obj(self, key: str):
         with self._connect_redis() as redis_cli:
-            await redis_cli.set(f"messages:{channel_id}", data)
+            await redis_cli.delete(key)
 
-    async def get_last_messages(self, channel_id: int):
+    async def get_cache_user_by_id(self, user_id: int):
         with self._connect_redis() as redis_cli:
-            data = redis_cli.get(f"messages:{channel_id}")
-            return data
+            await redis_cli.hgetall(f"user:{user_id}")
 
-    async def clean_obj(self, key: str, **kwargs):
+    async def set_cache_user_by_id(self, user_id: int, data: dict):
         with self._connect_redis() as redis_cli:
-            redis_cli.delete(key)
+            for key, value in data.items():
 
-            if kwargs:
-                redis_cli.set(key, kwargs['data'])
+                await redis_cli.hset(f"user:{user_id}", key=key, value=value)

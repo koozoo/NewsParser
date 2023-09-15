@@ -85,6 +85,7 @@ class OpenAiData(BaseModel):
 
 class ProjectData(BaseModel):
     main_url: str
+    channel_id: int
     support_group_url: str = None
     group_for_marketing: str = None
     contact_info: str = {}
@@ -128,7 +129,7 @@ class Settings:
     def _get_config_parser_bot_token(self):
         api_hash = os.getenv("ParserBotApiHash")
         api_id = os.getenv("ParserBotApiId")
-        max_update_post = 50
+        max_update_post = 40
 
         return TelegramParserData(api_hash=api_hash, api_id=api_id, max_update_post=max_update_post)
 
@@ -147,7 +148,7 @@ class Settings:
         return AdminData(id_=admin_id, email=admin_email)
 
     def _get_project_const(self) -> ProjectData:
-        return ProjectData(main_url="http://t.me")
+        return ProjectData(main_url="http://t.me", channel_id=1855021356)
 
     def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),

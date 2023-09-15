@@ -13,12 +13,14 @@ class PostData(BaseModel):
     date: str
     text: str
     state: str = "new"  # для обработки задач для openAI
-    is_published: bool = False  # отправлять на публикацию
+    is_published: bool = False  # отправлять на публикацию после того как придет aprove от админа
     modified_text: str = "none"
-    type: str = "Text"
+    type: str = "text"
     id: int = 0
-    is_old: bool = False
-    url: str = "none"
+    url: str = "none" # для web parsing
+    published: bool = False # меняется после публикации
+    reject: bool = False # удалить из подбоки статью
+    media: dict = None
 
     def to_dict(self):
         return {
@@ -28,12 +30,14 @@ class PostData(BaseModel):
             "date": self.date,
             "text": self.text,
             "state": self.state,
-            # new(создано системой но в работу еще не запущено), pending(ожидает обработки текста), process(текст в обработке), await(ожидает подтверждения), done, closed
+            # new(создано системой но в работу еще не запущено), pending(отправка в очередь для обработки текста), process(текст в обработке), await(ожидает подтверждения), done, closed
             "type": self.type,
             "is_published": self.is_published,
             "modified_text": self.modified_text,
             "id": self.id,
-            "is_old": self.is_old
+            "published": self.published,
+            "reject": self.reject,
+            "media": self.media
         }
 
     @staticmethod
@@ -48,8 +52,10 @@ class PostData(BaseModel):
                         is_published=data.get('is_published', False),
                         modified_text=data.get('modified_text', "none"),
                         id=data.get('id', 0),
-                        is_old=data.get('is_old', False),
-                        url=data.get('url', "none"))
+                        url=data.get('url', "none"),
+                        published=data.get('published', False),
+                        reject=data.get('reject', False),
+                        media=data.get('media', {}))
 
 
 class Post(Base):
@@ -65,7 +71,8 @@ class Post(Base):
         Column("state", String, nullable=False),
         Column("text", String, nullable=False),
         Column("modified_text", String),
-        Column("is_old", Boolean, default=False)
+        Column("published", Boolean, default=False),
+        Column("reject", Boolean, default=False)
     )
 
     def __init__(self, post: PostData):
@@ -77,4 +84,5 @@ class Post(Base):
         self.state = post.state
         self.text = post.text
         self.modified_text = post.modified_text
-        self.is_old = post.is_old
+        self.published = post.published
+        self.reject = post.reject

@@ -38,6 +38,36 @@ async def get_posts_by_channel_id(cid: int):
     return curr
 
 
+async def get_posts_for_compare(cid: int, limit: int):
+    async with async_session_maker() as s:
+        q = select(Post).filter(Post.channel_id == cid).limit(limit)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_new_posts_by_channel_id(cid: int):
+    async with async_session_maker() as s:
+        q = select(Post).filter(Post.channel_id == cid,
+                                Post.type != "video",
+                                Post.is_old == False,
+                                Post.published == False)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_posts_submission_publish_by_channel_id(cid: int):
+    async with async_session_maker() as s:
+        q = select(Post).filter(Post.channel_id == cid,
+                                Post.type != "video",
+                                Post.is_published == True,
+                                Post.published == False)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
 async def get_all_users():
     async with async_session_maker() as s:
         q = select(User)
