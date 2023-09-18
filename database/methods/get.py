@@ -2,6 +2,8 @@ from sqlalchemy import and_
 from sqlalchemy.future import select
 from database.main import async_session_maker
 from database.models.channel import Channel
+from database.models.media import Media
+from database.models.modify_post import ModifyPost
 from database.models.posts import Post
 from database.models.user import User
 
@@ -33,6 +35,32 @@ async def get_channel_by_link(link: int):
 async def get_posts_by_channel_id(cid: int):
     async with async_session_maker() as s:
         q = select(Post).filter(Post.channel_id == cid)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_posts_for_openai():
+    async with async_session_maker() as s:
+        q = select(Post).filter(and_(Post.state == "new",
+                                     Post.published == False,
+                                     Post.reject == False))
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_posts_for_approve_post():
+    async with async_session_maker() as s:
+        q = select(ModifyPost).filter(ModifyPost.approve_state == "new")
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_posts_for_published_post():
+    async with async_session_maker() as s:
+        q = select(ModifyPost).filter(ModifyPost.approve_state == "approve")
         data = await s.execute(q)
         curr = data.scalars()
     return curr
@@ -87,6 +115,14 @@ async def get_user_by_id(user_id: int):
 async def get_new_msg_by_cin(cin: int):
     async with async_session_maker() as s:
         q = select(Post).filter(and_(Post.channel_id == cin, Post.state == "new", Post.type == "Text"))
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_photo(channel_id: int, message_id: int):
+    async with async_session_maker() as s:
+        q = select(Media).filter(and_(Media.channel_id == channel_id, Media.post_id == message_id))
         data = await s.execute(q)
         curr = data.scalars()
     return curr

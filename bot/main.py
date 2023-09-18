@@ -9,16 +9,18 @@ from services.main import Service
 from services.telegram_parser.main import client as telegram_parser
 
 
-async def register_all_handlers(dp: Dispatcher):
+async def _register_all_handlers(dp: Dispatcher):
     await register_handlers(dp=dp)
 
 
-async def _run_global_task():
+async def _register_global_task(**kwarg):
     service_entity = Service()
 
     scheduler.add_job(func=service_entity.init_parsing, trigger="cron", minute="*/1", kwargs={"type_": "telegram"})
+    scheduler.add_job(func=service_entity.init_open_ai, trigger="cron", minute="*/1")
+    scheduler.add_job(func=service_entity.init_approve_notification, trigger="cron", minute="*/1",
+                      kwargs={"bot": kwarg['bot']})
     # scheduler.add_job(func=service_entity.init_parsing, trigger="cron", minute="*/1", kwargs={"type_": "web"})
-    await _run_all_sub_services()
 
 
 async def _run_all_sub_services():
@@ -31,9 +33,9 @@ async def start_bot():
     bot = Bot(token=settings.bot.token, parse_mode='HTML')
 
     dp = Dispatcher()
-    await register_all_handlers(dp=dp)
-
-    dp.startup.register(_run_global_task)
+    await _register_all_handlers(dp=dp)
+    await _register_global_task(dp=dp, bot=bot)
+    dp.startup.register(_run_all_sub_services)
 
     try:
         await dp.start_polling(bot)

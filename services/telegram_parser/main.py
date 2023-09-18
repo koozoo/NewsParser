@@ -85,22 +85,28 @@ class TelegramParser:
             data['type'] = 'web_page'
 
             web_path = msg_data['media']['webpage']
-            photo_path = web_path.get('photo', None)
 
-            if photo_path is not None:
-                data['media'] = {
-                    "type": "web_page",
-                    "post_id": msg_data['id'],
-                    "file_name": "none",
-                    "telegram_document_id": photo_path['id'],
-                    "access_hash": photo_path['access_hash'],
-                    "file_reference": str(photo_path['file_reference']),
-                    "url": web_path['url'],
-                    "web_id": web_path['id'],
-                    "channel_id": msg_data['peer_id']['channel_id']
-                }
+            type_ = web_path['type']
+
+            if type_ == "photo":
+                photo_path = web_path.get('photo', None)
+
+                if photo_path is not None:
+                    data['media'] = {
+                        "type": "web_page",
+                        "post_id": msg_data['id'],
+                        "file_name": "none",
+                        "telegram_document_id": photo_path['id'],
+                        "access_hash": photo_path['access_hash'],
+                        "file_reference": str(photo_path['file_reference']),
+                        "url": web_path['url'],
+                        "web_id": web_path['id'],
+                        "channel_id": msg_data['peer_id']['channel_id']
+                    }
+                else:
+                    data['media'] = {}
             else:
-                data['media'] = {}
+                data['type'] = 'video'
 
             return PostData.dict_to_post_data(data=data)
         else:
@@ -136,7 +142,6 @@ class TelegramParser:
                     list_post_data.append(post_)
 
             except Exception as e:
-                print(msg)
                 logging.info(f"Error in get_limited_message: {e}")
                 continue
 

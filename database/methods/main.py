@@ -1,11 +1,14 @@
 from database.methods.post import add_item_autoincrement, \
     add_transaction_autoincrement
-from database.methods.get import get_channel_by_id, \
-    get_posts_by_channel_id, \
-    get_all_users, get_user_by_id, get_all_channels, get_channel_by_link, get_posts_for_compare
-from database.methods.put import update_post_by_post_id, update_user_by_id, update_channel_by_id
+from database.methods.get import (get_channel_by_id, \
+                                  get_posts_by_channel_id, \
+                                  get_all_users, get_user_by_id, get_all_channels,
+                                  get_channel_by_link, get_posts_for_compare, get_posts_for_openai,
+                                  get_posts_for_approve_post, get_posts_for_published_post, get_photo)
+from database.methods.put import (update_post_by_post_id, update_user_by_id, update_channel_by_id,
+                                  update_modify_post_by_post_id)
 from database.models.channel import ChannelData, Channel
-from database.models.media import Media
+from database.models.modify_post import ModifyPostData
 from database.models.posts import Post, PostData
 from database.models.user import UserData, User
 from settings.config import settings
@@ -69,6 +72,9 @@ class Database:
     async def add_post(self, item: PostData) -> int | None:
         return await add_item_autoincrement(Post(item))
 
+    async def add_any_item(self, item: Base):
+        return await add_item_autoincrement(item)
+
     async def update_posts(self, items: list[dict]):
         for item in items:
             for k, v in item.items():
@@ -86,8 +92,25 @@ class Database:
     async def get_new_post_by_channel_id(self, channel_id: int):
         return await get_posts_by_channel_id(channel_id)
 
+    async def get_posts_for_openai(self):
+        return {"posts": [PostData(id=post.id,
+                                   text=post.text,
+                                   state="pending").to_dict() for post in await get_posts_for_openai()]}
+
+    async def get_posts_for_approve(self):
+        return {"posts": [ModifyPostData(id=post.id,
+                                         text=post.text,
+                                         post_id=post.post_id,
+                                         approve_state="await") for post in await get_posts_for_approve_post()]}
+
     async def get_all_post_id_by_channel_id(self, channel_id: int) -> list[int]:
         return [item.id for item in await get_posts_by_channel_id(channel_id)]
 
     async def get_all_users(self):
         return await get_all_users()
+
+    async def update_mod_post(self, post_id: int, data: dict):
+        await update_modify_post_by_post_id(post_id=post_id, data=data)
+
+    async def get_photo_by_cin_and_msg_id(self, channel_id: int, message_id: int):
+        return await get_photo(channel_id=channel_id, message_id=message_id)

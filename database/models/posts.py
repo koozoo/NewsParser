@@ -10,7 +10,7 @@ class PostData(BaseModel):
     channel_id: int = 0
     message_id: int = 0
     title: str = "none"
-    date: str
+    date: str = dt.datetime.utcnow()
     text: str
     state: str = "new"  # для обработки задач для openAI
     is_published: bool = False  # отправлять на публикацию после того как придет aprove от админа
