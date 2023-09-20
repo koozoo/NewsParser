@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  db:
+    image: "postgres"
+    restart: always
+    volumes:
+      - /app/news/_data:/var/lib/postgresql/data
+    ports:
+      - "5445:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=4682233
+    container_name: news_bot_db
+  redis:
+    image: "redis:alpine"
+    restart: always
+    ports:
+      - "6381:6379"
+
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+    container_name: news_bot_cache
+  app:
+    container_name: news_bot_app
+    image: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "python run.py"
+#    command: bash -c "alembic revision --autogenerate -m "init" &&  alembic upgrade heads && python run.py"
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+networks:
+  node_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
