@@ -3,6 +3,7 @@ from database.models.media import MediaData, Media
 from database.models.posts import PostData, Post
 from services.cache.cache import Cache
 from scheduler.main import scheduler
+from settings.config import settings
 
 
 class AddPosts:
@@ -30,6 +31,7 @@ class AddPosts:
         msg_id_new = [item.message_id for item in fresh_posts]
 
         diff = list(set(msg_id_old) ^ set(msg_id_new))
+
         return [p for p in fresh_posts if p.message_id in diff]
 
     async def init_add_new_posts(self) -> None:
@@ -40,7 +42,7 @@ class AddPosts:
 
         if posts:
             post_not_in_database = await self._compare_posts(fresh_posts=self.last_posts,
-                                                             posts_in_db=posts)
+                                                             posts_in_db=posts[-settings.telegram_parser.max_update_post:])
 
             if post_not_in_database:
                 await self._add_new_posts(posts=post_not_in_database)

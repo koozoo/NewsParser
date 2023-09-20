@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from sqlalchemy.future import select
 from database.main import async_session_maker
 from database.models.channel import Channel
@@ -58,17 +58,36 @@ async def get_posts_for_approve_post():
     return curr
 
 
-async def get_posts_for_published_post():
+async def get_posts_for_published_post(message_id: int, channel_id: int):
     async with async_session_maker() as s:
-        q = select(ModifyPost).filter(ModifyPost.approve_state == "approve")
+        q = select(Post).filter(and_(Post.message_id == message_id,
+                                     Post.channel_id == channel_id,
+                                     Post.modified_text != "none"))
         data = await s.execute(q)
         curr = data.scalars()
     return curr
 
 
-async def get_posts_for_compare(cid: int, limit: int):
+async def get_post(message_id: int, channel_id: int):
     async with async_session_maker() as s:
-        q = select(Post).filter(Post.channel_id == cid).limit(limit)
+        q = select(Post).filter(and_(Post.message_id == message_id,
+                                     Post.channel_id == channel_id))
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_mod_post(post_id: int):
+    async with async_session_maker() as s:
+        q = select(ModifyPost).filter(ModifyPost.id == post_id)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_posts_for_compare(cid: int):
+    async with async_session_maker() as s:
+        q = select(Post).filter(Post.channel_id == cid)
         data = await s.execute(q)
         curr = data.scalars()
     return curr

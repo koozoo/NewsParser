@@ -67,9 +67,9 @@ def admin_profile_menu():
 def approve_message(new_post: ModifyPostData):
 
     bts = {
-        "Опубликовать ✅": f"MESSAGE_approve_{new_post.id}:{new_post.post_id}",
-        "Преписать ♻️": f"MESSAGE_repeat_{new_post.id}:{new_post.post_id}",
-        "Отклонить 🚫": f"MESSAGE_reject_{new_post.id}:{new_post.post_id}"
+        "Опубликовать ✅": f"MESSAGE_approve_{new_post.id}:{new_post.post_id}:{new_post.channel_id}",
+        "Преписать ♻️": f"MESSAGE_repeat_{new_post.id}:{new_post.post_id}:{new_post.channel_id}",
+        "Отклонить 🚫": f"MESSAGE_reject_{new_post.id}:{new_post.post_id}:{new_post.channel_id}"
     }
 
     builder = InlineKeyboardBuilder()

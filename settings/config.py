@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-
 load_dotenv()
 
 
@@ -86,6 +85,7 @@ class OpenAiData(BaseModel):
 class ProjectData(BaseModel):
     main_url: str
     channel_id: int
+    default_prompt: str
     support_group_url: str = None
     group_for_marketing: str = None
     contact_info: str = {}
@@ -103,7 +103,6 @@ class SettingsData(BaseModel):
 
 
 class Settings:
-
     settings: None
 
     def _get_config_db(self):
@@ -129,7 +128,7 @@ class Settings:
     def _get_config_parser_bot_token(self):
         api_hash = os.getenv("ParserBotApiHash")
         api_id = os.getenv("ParserBotApiId")
-        max_update_post = 5
+        max_update_post = 10
 
         return TelegramParserData(api_hash=api_hash, api_id=api_id, max_update_post=max_update_post)
 
@@ -148,7 +147,14 @@ class Settings:
         return AdminData(id_=admin_id, email=admin_email)
 
     def _get_project_const(self) -> ProjectData:
-        return ProjectData(main_url="http://t.me", channel_id=1855021356)
+        return ProjectData(main_url="http://t.me",
+                           channel_id=1855021356,
+                           default_prompt="Вам будет дана статья или сообщение для переработки. Ваша цель - "
+                                          "переписать содержание, сохраняя"
+                                          "ясность и краткость, сохраняя при этом оригинальный смысл. Ваш "
+                                          "переписанный контент должен быть"
+                                          f"увлекательным и легким для чтения. Так же необходимо,"
+                                          f" очистить текст от всех слов содержащих знаки # и @. Вот статья:")
 
     def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),

@@ -12,10 +12,9 @@ class OpenAi:
         await self._run_manager()
 
     async def _run_manager(self):
-        print("manager posts ", self.posts)
+
         while self.posts:
 
             job = self.posts.pop()
-            print(job)
             return await self._api.run_job(job)
 

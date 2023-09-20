@@ -22,17 +22,16 @@ class OpenAiApi:
         }
 
         await self.database.update_post(post_id=data['id'], data=update_data)
-
-        mod_text_entity = ModifyPostData(post_id=data['id'],
-                                         text=new_text)
+        print(data)
+        mod_text_entity = ModifyPostData(post_id=data['message_id'],
+                                         text=new_text,
+                                         channel_id=data['channel_id'],
+                                         type=data['type'])
 
         await self.database.add_any_item(item=ModifyPost(mod_text_entity))
 
     async def _create_message(self, text):
-        return ("Вам будет дана статья или сообщение для переработки. Ваша цель - переписать содержание, сохраняя "
-                "ясность и краткость, сохраняя при этом оригинальный смысл. Ваш переписанный контент должен быть "
-                f"увлекательным и легким для чтения. Так же необходимо,"
-                f" очистить тест от всех слов содержащих знаки # и @. Вот статья: {text}")
+        return f"{settings.project_const.default_prompt} {text}"
 
     async def _send_request(self, text: str):
         try:

@@ -13,7 +13,6 @@ class PostData(BaseModel):
     date: str = dt.datetime.utcnow()
     text: str
     state: str = "new"  # для обработки задач для openAI
-    is_published: bool = False  # отправлять на публикацию после того как придет aprove от админа
     modified_text: str = "none"
     type: str = "text"
     id: int = 0
@@ -32,7 +31,6 @@ class PostData(BaseModel):
             "state": self.state,
             # new(создано системой но в работу еще не запущено), pending(отправка в очередь для обработки текста), process(текст в обработке), await(ожидает подтверждения), done, closed
             "type": self.type,
-            "is_published": self.is_published,
             "modified_text": self.modified_text,
             "id": self.id,
             "published": self.published,
@@ -49,7 +47,6 @@ class PostData(BaseModel):
                         text=data.get('text', ""),
                         state=data.get('state', "new"),
                         type=data.get('type', "none"),
-                        is_published=data.get('is_published', False),
                         modified_text=data.get('modified_text', "none"),
                         id=data.get('id', 0),
                         url=data.get('url', "none"),
