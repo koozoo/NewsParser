@@ -7,7 +7,7 @@ from database.models.modify_post import ModifyPostData
 def admin_menu():
     bts = {
         "Добавить канал": "ADMIN_add_chanel",
-        "Обновить данные": "ADMIN_UPDATE_data",
+        "Права доступа": "ADMIN_rights",
         "Узнать id канала": "TOOL_GetChannelId",
         "Профиль": "PROFILE_admin"
     }
@@ -20,6 +20,23 @@ def admin_menu():
 
     return builder.as_markup()
 
+
+def admin_rights_menu():
+    bts = {
+        "Добавить админа": "ADMIN_rights_add",
+        "Удалить админа": "ADMIN_rights_delete",
+        "Удалить всех админов": "ADMIN_rights_delete:all",
+        "Назад": "ADMIN_menu"
+    }
+
+    builder = InlineKeyboardBuilder()
+
+    for btn_title, btn_callback in bts.items():
+        b = InlineKeyboardButton(text=btn_title, callback_data=btn_callback)
+        builder.add(b)
+
+    return builder.as_markup()
+    
 
 def user_menu():
     bts = {

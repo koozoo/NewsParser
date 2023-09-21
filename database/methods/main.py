@@ -5,7 +5,7 @@ from database.methods.get import (get_channel_by_id, \
                                   get_all_users, get_user_by_id, get_all_channels,
                                   get_channel_by_link, get_posts_for_compare, get_posts_for_openai,
                                   get_posts_for_approve_post, get_posts_for_published_post, get_photo, get_mod_post,
-                                  get_post)
+                                  get_post, get_all_admin_)
 from database.methods.put import (update_post_by_post_id, update_user_by_id, update_channel_by_id,
                                   update_modify_post_by_post_id)
 from database.models.channel import ChannelData, Channel
@@ -88,7 +88,7 @@ class Database:
     async def get_posts_by_channel_id(self, channel_id: int):
         return await get_posts_by_channel_id(channel_id)
 
-    async def get_posts_for_compare_(self, channel_id: int, limit: int = settings.telegram_parser.max_update_post):
+    async def get_posts_for_compare_(self, channel_id: int):
         return await get_posts_for_compare(cid=channel_id)
 
     async def get_new_post_by_channel_id(self, channel_id: int):
@@ -111,14 +111,8 @@ class Database:
                                          channel_id=post.channel_id) for post in await get_posts_for_approve_post()]}
 
     async def get_post_for_publish(self, message_id: int, channel_id: int):
-        return [PostData(id=item.id,
-                         channel_id=item.channel_id,
-                         message_id=item.message_id,
-                         text=item.text,
-                         modified_text=item.modified_text,
-                         type=item.type) for item in await get_posts_for_published_post(message_id=message_id,
-
-                                                                                        channel_id=channel_id)]
+        return [item.id for item in await get_posts_for_published_post(message_id=message_id,
+                                                                       channel_id=channel_id)]
 
     async def get_post_(self, message_id: int, channel_id: int):
         return [PostData(id=item.id,
@@ -129,7 +123,6 @@ class Database:
                          type=item.type) for item in await get_post(message_id=message_id, channel_id=channel_id)]
 
     async def get_mod_post_by_id(self, post_id: int):
-        print(type(post_id))
         return [item.text for item in await get_mod_post(post_id=post_id)]
 
     async def get_all_post_id_by_channel_id(self, channel_id: int) -> list[int]:
@@ -147,3 +140,6 @@ class Database:
                                   telegram_document_id=media.telegram_document_id,
                                   channel_id=media.channel_id) for media in await get_photo(channel_id=channel_id,
                                                                                             message_id=message_id)}
+
+    async def get_all_admin(self):
+        return [item.id for item in await get_all_admin_() if item.id != settings.admin.id_]

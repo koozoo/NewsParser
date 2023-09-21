@@ -32,7 +32,7 @@ class AddPosts:
 
         diff = list(set(msg_id_old) ^ set(msg_id_new))
 
-        return [p for p in fresh_posts if p.message_id in diff]
+        return [p for p in fresh_posts if p.message_id in diff and p.message_id not in msg_id_old]
 
     async def init_add_new_posts(self) -> None:
         channel_id = self.last_posts[0].channel_id

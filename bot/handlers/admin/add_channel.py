@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from bot.keyboards.reply import yes_no
 from bot.handlers.utils import is_email
 from database.methods.main import Database
-from database.models.channel import ChannelData, Channel
+from database.models.channel import ChannelData
 from scheduler.main import scheduler
 
 
