@@ -1,9 +1,24 @@
 from aiogram.types import CallbackQuery
 from scheduler.main import scheduler
-from bot.handlers.admin.publish_post import PublishPost
 from database.methods.main import Database
 from services.cache.cache import Cache
 from settings.config import settings
+
+
+class PublishPost:
+
+    def __init__(self, message_id: int, channel_id: int, context: CallbackQuery):
+        self.context = context
+        self.message_id = message_id
+        self.channel_id = channel_id
+        self._database = Database()
+        self._cache = Cache()
+
+    async def _send_message(self, post):
+        await self.context.bot.send_message(chat_id=f"-100{settings.project_const.channel_id}", text=post)
+
+    async def start(self, post):
+        await self._send_message(post=post)
 
 
 class ApprovePost:
@@ -55,7 +70,8 @@ class ApprovePost:
         })
 
         publish = PublishPost(message_id=message_id, channel_id=channel_id, context=self.context)
-        await publish.start()
+        if mod_text is not None:
+            scheduler.add_job(publish.start, kwargs={"post": mod_text})
 
     async def _reject(self, data):
         mod_post_id = int(data[0])

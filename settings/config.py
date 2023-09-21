@@ -128,7 +128,7 @@ class Settings:
     def _get_config_parser_bot_token(self):
         api_hash = os.getenv("ParserBotApiHash")
         api_id = os.getenv("ParserBotApiId")
-        max_update_post = 10
+        max_update_post = 4
 
         return TelegramParserData(api_hash=api_hash, api_id=api_id, max_update_post=max_update_post)
 

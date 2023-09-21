@@ -59,6 +59,7 @@ async def get_posts_for_approve_post():
 
 
 async def get_posts_for_published_post(message_id: int, channel_id: int):
+    print(message_id, channel_id)
     async with async_session_maker() as s:
         q = select(Post).filter(and_(Post.message_id == message_id,
                                      Post.channel_id == channel_id,
@@ -87,7 +88,7 @@ async def get_mod_post(post_id: int):
 
 async def get_posts_for_compare(cid: int):
     async with async_session_maker() as s:
-        q = select(Post).filter(Post.channel_id == cid)
+        q = select(Post).filter(Post.channel_id == cid).order_by(Post.message_id)
         data = await s.execute(q)
         curr = data.scalars()
     return curr
@@ -118,6 +119,14 @@ async def get_posts_submission_publish_by_channel_id(cid: int):
 async def get_all_users():
     async with async_session_maker() as s:
         q = select(User)
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_all_admin_():
+    async with async_session_maker() as s:
+        q = select(User).filter(User.is_admin == True)
         data = await s.execute(q)
         curr = data.scalars()
     return curr
