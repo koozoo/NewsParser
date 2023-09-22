@@ -1,13 +1,15 @@
 import datetime
 import logging
+import os
 
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest, \
     GetFullChannelRequest
+from telethon.types import MessageMediaPhoto, MessageMediaWebPage
 
 from database.methods.main import Database
 from database.models.media import MediaData
-from database.models.posts import Post, PostData
+from database.models.posts import PostData
 from database.models.channel import ChannelData
 from services.cache.cache import Cache
 from services.telegram_parser.add_posts import AddPosts
@@ -123,8 +125,40 @@ class TelegramParser:
         }
         return await self._get_type_entity(message_data, data)
 
-    async def _create_media(self, media: PostData):
-        return MediaData.post_data_to_media_data(media)
+    async def _download_media(self, media_entity: MessageMediaWebPage | MessageMediaPhoto, path: str):
+        if isinstance(media_entity.media, MessageMediaPhoto):
+            filepath = path + f"/{media_entity.media.photo.id}.jpg"
+            if os.path.exists(filepath):
+
+                return "none"
+            else:
+                await self._cli.download_media(media_entity.media, path + f"/{media_entity.media.photo.id}.jpg")
+
+                return filepath
+        elif isinstance(media_entity.media, MessageMediaWebPage):
+            filepath = path + f"/{media_entity.media.webpage.photo.id}.jpg"
+            if os.path.exists(filepath):
+
+                return "none"
+            else:
+                await self._cli.download_media(media_entity.media,
+                                               path + f"/{media_entity.media.webpage.photo.id}.jpg")
+                return filepath
+        else:
+            print("UNKNOWN TYPE")
+
+    async def _save_photo(self, photo_entity) -> str:
+        root_path = settings.project_const.root
+        today_folder = f'{root_path}/static/{datetime.datetime.date(datetime.datetime.utcnow())}'
+
+        if os.path.exists(today_folder):
+            return await self._download_media(photo_entity, today_folder)
+        else:
+            os.mkdir(today_folder)
+            return await self._download_media(photo_entity, today_folder)
+
+    async def _create_media(self, media: PostData, photo_path: str) -> MediaData:
+        return MediaData.post_data_to_media_data(media, photo_path=photo_path)
 
     async def _get_limited_messages(self, entity, limit=settings.telegram_parser.max_update_post):
 
@@ -136,9 +170,13 @@ class TelegramParser:
             try:
                 post_ = await self._create_post_entity(message_data=msg.to_dict())
 
-                if post_.type != "video" and post_.text != "":
+                if post_.type != "video" and post_.text != "" and len(post_.text) > 100:
                     if post_.type == "photo" or post_.type == "web_page":
-                        media_data.append(await self._create_media(post_))
+
+                        photo_path = await self._save_photo(photo_entity=msg)
+                        print("photo path in telegram_parser -> _get_limited_msg -> photo_path ", photo_path)
+                        media_data.append(await self._create_media(post_, photo_path=photo_path))
+
                     list_post_data.append(post_)
 
             except Exception as e:

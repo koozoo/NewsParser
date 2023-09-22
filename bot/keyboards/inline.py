@@ -5,18 +5,14 @@ from database.models.modify_post import ModifyPostData
 
 
 def admin_menu():
-    bts = {
-        "Добавить канал": "ADMIN_add_chanel",
-        "Права доступа": "ADMIN_rights",
-        "Узнать id канала": "TOOL_GetChannelId",
-        "Профиль": "PROFILE_admin"
-    }
-
     builder = InlineKeyboardBuilder()
 
-    for btn_title, btn_callback in bts.items():
-        b = InlineKeyboardButton(text=btn_title, callback_data=btn_callback)
-        builder.add(b)
+    b_add = InlineKeyboardButton(text="🖍 Добавить канал", callback_data="ADMIN_add_chanel")
+    b_right = InlineKeyboardButton(text="🔐 Права доступа", callback_data="ADMIN_rights")
+    b_channel_id = InlineKeyboardButton(text="🔢 Узнать id канала", callback_data="TOOL_GetChannelId")
+    b_profile = InlineKeyboardButton(text="📋 Профиль", callback_data="PROFILE_admin")
+
+    builder.row(b_add).row(b_right, b_channel_id).row(b_profile)
 
     return builder.as_markup()
 
@@ -31,9 +27,12 @@ def admin_rights_menu():
 
     builder = InlineKeyboardBuilder()
 
-    for btn_title, btn_callback in bts.items():
-        b = InlineKeyboardButton(text=btn_title, callback_data=btn_callback)
-        builder.add(b)
+    b_add = InlineKeyboardButton(text="Добавить админа", callback_data="ADMIN_rights_add")
+    b_delete = InlineKeyboardButton(text="Удалить админа", callback_data="ADMIN_rights_delete")
+    delete_all = InlineKeyboardButton(text="Удалить всех админов", callback_data="ADMIN_rights_delete:all")
+    b_back = InlineKeyboardButton(text="Назад", callback_data="ADMIN_menu")
+
+    builder.row(b_add).row(b_delete, delete_all).row(b_back)
 
     return builder.as_markup()
     

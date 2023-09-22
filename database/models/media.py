@@ -17,6 +17,7 @@ class MediaData(BaseModel):
     url: str = 'none'
     web_id: int = 0
     channel_id: int = 0
+    photo_path: str
 
     def to_dict(self):
         return {
@@ -29,11 +30,12 @@ class MediaData(BaseModel):
             "file_reference": self.file_reference,
             "url": self.url,
             "web_id": self.web_id,
-            "channel_id": self.channel_id
+            "channel_id": self.channel_id,
+            "photo_path": self.photo_path
         }
 
     @staticmethod
-    def post_data_to_media_data(data: PostData):
+    def post_data_to_media_data(data: PostData, photo_path):
         return MediaData(type=data.media['type'],
                          post_id=data.media['post_id'],
                          url=data.media['url'],
@@ -41,7 +43,8 @@ class MediaData(BaseModel):
                          telegram_document_id=data.media['telegram_document_id'],
                          access_hash=data.media['access_hash'],
                          file_reference=data.media['file_reference'],
-                         channel_id=data.media['channel_id'])
+                         channel_id=data.media['channel_id'],
+                         photo_path=photo_path)
 
 
 class Media(Base):
@@ -57,16 +60,18 @@ class Media(Base):
         Column("file_reference", String),
         Column("url", String),
         Column("web_id", BigInteger),
-        Column("channel_id", BigInteger)
+        Column("channel_id", BigInteger),
+        Column("photo_path", String)
     )
 
-    def __init__(self, channel: MediaData):
-        self.type = channel.type
-        self.post_id = channel.post_id
-        self.file_name = channel.file_name
-        self.telegram_document_id = channel.telegram_document_id
-        self.access_hash = channel.access_hash
-        self.file_reference = channel.file_reference
-        self.url = channel.url
-        self.web_id = channel.web_id
-        self.channel_id = channel.channel_id
+    def __init__(self, media: MediaData):
+        self.type = media.type
+        self.post_id = media.post_id
+        self.file_name = media.file_name
+        self.telegram_document_id = media.telegram_document_id
+        self.access_hash = media.access_hash
+        self.file_reference = media.file_reference
+        self.url = media.url
+        self.web_id = media.web_id
+        self.channel_id = media.channel_id
+        self.photo_path = media.photo_path

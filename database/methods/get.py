@@ -94,28 +94,6 @@ async def get_posts_for_compare(cid: int):
     return curr
 
 
-async def get_new_posts_by_channel_id(cid: int):
-    async with async_session_maker() as s:
-        q = select(Post).filter(Post.channel_id == cid,
-                                Post.type != "video",
-                                Post.is_old == False,
-                                Post.published == False)
-        data = await s.execute(q)
-        curr = data.scalars()
-    return curr
-
-
-async def get_posts_submission_publish_by_channel_id(cid: int):
-    async with async_session_maker() as s:
-        q = select(Post).filter(Post.channel_id == cid,
-                                Post.type != "video",
-                                Post.is_published == True,
-                                Post.published == False)
-        data = await s.execute(q)
-        curr = data.scalars()
-    return curr
-
-
 async def get_all_users():
     async with async_session_maker() as s:
         q = select(User)
@@ -132,17 +110,17 @@ async def get_all_admin_():
     return curr
 
 
-async def get_user_by_id(user_id: int):
+async def get_media_for_delete():
     async with async_session_maker() as s:
-        q = select(User).filter(User.id == user_id)
+        q = select(Media).filter(Media.file_name == "delete")
         data = await s.execute(q)
         curr = data.scalars()
     return curr
 
 
-async def get_new_msg_by_cin(cin: int):
+async def get_user_by_id(user_id: int):
     async with async_session_maker() as s:
-        q = select(Post).filter(and_(Post.channel_id == cin, Post.state == "new", Post.type == "Text"))
+        q = select(User).filter(User.id == user_id)
         data = await s.execute(q)
         curr = data.scalars()
     return curr

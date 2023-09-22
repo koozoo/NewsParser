@@ -3,6 +3,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
 from bot.keyboards.inline import admin_rights_menu, admin_menu
+from bot.keyboards.reply import yes_no
 from database.methods.main import Database
 from scheduler.main import scheduler
 
@@ -47,7 +48,7 @@ class AccessManagementFSM:
         await message.bot.delete_message(message.from_user.id, int(data['last_msg_id']))
 
         await state.update_data(id_=id_, last_msg_id=message.message_id)
-        await message.answer(text=await text_messages(query="finish_process", id=id_))
+        await message.answer(text=await text_messages(query="finish_process", id=id_), reply_markup=yes_no())
 
     @staticmethod
     async def failed_admin_id_process(message: Message):
