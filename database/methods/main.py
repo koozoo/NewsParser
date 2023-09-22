@@ -7,7 +7,7 @@ from database.methods.get import (get_channel_by_id, \
                                   get_posts_for_approve_post, get_posts_for_published_post, get_photo, get_mod_post,
                                   get_post, get_all_admin_)
 from database.methods.put import (update_post_by_post_id, update_user_by_id, update_channel_by_id,
-                                  update_modify_post_by_post_id)
+                                  update_modify_post_by_post_id, update_media_by_media_id)
 from database.models.channel import ChannelData, Channel
 from database.models.media import MediaData
 from database.models.modify_post import ModifyPostData
@@ -84,6 +84,9 @@ class Database:
 
     async def update_post(self, post_id: int, data: dict):
         await update_post_by_post_id(post_id=post_id, data=data)
+
+    async def update_media(self, media_id: int, data: dict):
+        await update_media_by_media_id(media_id=media_id, data=data)
 
     async def get_posts_by_channel_id(self, channel_id: int):
         return await get_posts_by_channel_id(channel_id)

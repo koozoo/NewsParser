@@ -5,6 +5,7 @@ from sqlalchemy import update
 
 from database.main import async_session_maker
 from database.models.channel import Channel
+from database.models.media import Media
 from database.models.modify_post import ModifyPost
 from database.models.posts import Post
 from database.models.user import User
@@ -24,6 +25,23 @@ async def update_post_by_post_id(post_id: int, data: dict):
             await s.commit()
 
             logging.info(f"item update POST ID: {post_id}"
+                         f"in data base {dt.datetime.utcnow()}")
+
+
+async def update_media_by_media_id(media_id: int, data: dict):
+
+    async with async_session_maker() as s:
+
+        async with s.begin():
+            q = update(
+                Media)\
+                .filter(Media.id == media_id)\
+                .values(data)\
+                .execution_options(synchronize_session="fetch")
+            await s.execute(q)
+            await s.commit()
+
+            logging.info(f"item update MEDIA ID: {media_id}"
                          f"in data base {dt.datetime.utcnow()}")
 
 

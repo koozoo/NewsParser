@@ -85,6 +85,7 @@ class OpenAiData(BaseModel):
 class ProjectData(BaseModel):
     main_url: str
     channel_id: int
+    root: str
     default_prompt: str
     support_group_url: str = None
     group_for_marketing: str = None
@@ -154,7 +155,8 @@ class Settings:
                                           "ясность и краткость, сохраняя при этом оригинальный смысл. Ваш "
                                           "переписанный контент должен быть"
                                           f"увлекательным и легким для чтения. Так же необходимо,"
-                                          f" очистить текст от всех слов содержащих знаки # и @. Вот статья:")
+                                          f" очистить текст от всех слов содержащих знаки # и @. Вот статья:",
+                           root=os.environ['PWD'])
 
     def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),

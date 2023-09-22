@@ -132,6 +132,14 @@ async def get_all_admin_():
     return curr
 
 
+async def get_media_for_delete():
+    async with async_session_maker() as s:
+        q = select(Media).filter(Media.photo_path == "delete")
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
 async def get_user_by_id(user_id: int):
     async with async_session_maker() as s:
         q = select(User).filter(User.id == user_id)
