@@ -125,9 +125,6 @@ class TelegramParser:
         }
         return await self._get_type_entity(message_data, data)
 
-    async def _check_file(self, filepath: str):
-        return os.path.exists(filepath)
-
     async def _download_media(self, media_entity: MessageMediaWebPage | MessageMediaPhoto, path: str):
         if isinstance(media_entity.media, MessageMediaPhoto):
             filepath = path + f"/{media_entity.media.photo.id}.jpg"
@@ -160,15 +157,6 @@ class TelegramParser:
             os.mkdir(today_folder)
             return await self._download_media(photo_entity, today_folder)
 
-    async def _delete_photo(self, path: str, media: MediaData):
-        os.remove(path=path)
-
-        update_data = {
-            "photo_path": "deleted"
-        }
-
-        await self._db.update_media(media_id=media.id, data=update_data)
-
     async def _create_media(self, media: PostData, photo_path: str) -> MediaData:
         return MediaData.post_data_to_media_data(media, photo_path=photo_path)
 
@@ -182,10 +170,11 @@ class TelegramParser:
             try:
                 post_ = await self._create_post_entity(message_data=msg.to_dict())
 
-                if post_.type != "video" and post_.text != "":
+                if post_.type != "video" and post_.text != "" and len(post_.text) > 100:
                     if post_.type == "photo" or post_.type == "web_page":
 
                         photo_path = await self._save_photo(photo_entity=msg)
+                        print("photo path in telegram_parser -> _get_limited_msg -> photo_path ", photo_path)
                         media_data.append(await self._create_media(post_, photo_path=photo_path))
 
                     list_post_data.append(post_)

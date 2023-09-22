@@ -12,5 +12,5 @@ async def cmd_start(message: Message):
 
 
 async def register_commands_handler(dp: Dispatcher):
-    logging.info("REGISTER ALL ADMIN HANDLERS")
+    logging.info("REGISTER ALL COMMANDS HANDLERS")
     dp.message.register(cmd_start, Command(commands=['start']))

@@ -141,7 +141,8 @@ class Database:
         return {"data": MediaData(type=media.type, id=media.id,
                                   post_id=media.post_id,
                                   telegram_document_id=media.telegram_document_id,
-                                  channel_id=media.channel_id) for media in await get_photo(channel_id=channel_id,
+                                  channel_id=media.channel_id,
+                                  photo_path=media.photo_path) for media in await get_photo(channel_id=channel_id,
                                                                                             message_id=message_id)}
 
     async def get_all_admin(self):

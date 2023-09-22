@@ -17,7 +17,7 @@ class MediaData(BaseModel):
     url: str = 'none'
     web_id: int = 0
     channel_id: int = 0
-    photo_path: str | None
+    photo_path: str
 
     def to_dict(self):
         return {
@@ -36,7 +36,6 @@ class MediaData(BaseModel):
 
     @staticmethod
     def post_data_to_media_data(data: PostData, photo_path):
-        print(photo_path)
         return MediaData(type=data.media['type'],
                          post_id=data.media['post_id'],
                          url=data.media['url'],
