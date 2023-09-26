@@ -1,10 +1,7 @@
-import os
-
 from aiogram import Bot
-from aiogram.types import InputFile, FSInputFile
+from aiogram.types import FSInputFile
 
 from database.methods.main import Database
-from database.models.media import MediaData
 from settings.config import settings
 from bot.keyboards.inline import approve_message
 
@@ -29,11 +26,13 @@ class Notification:
 
                     photo_data = await self.database.get_photo_by_cin_and_msg_id(channel_id=new_post.channel_id,
                                                                                  message_id=new_post.post_id)
-
-                    photo = FSInputFile(path=photo_data['data'].photo_path)
-                    await bot.send_photo(settings.admin.id_, photo=photo, caption="⚠️ Новый пост на проверку: ⚠️\n\n"
-                                                                                  f"{new_post.text}",
-                                         reply_markup=approve_message(new_post))
+                    print("photo in notify 29 string", photo_data)
+                    if photo_data:
+                        photo = FSInputFile(path=photo_data['data'].photo_path)
+                        await bot.send_photo(settings.admin.id_, photo=photo,
+                                             caption="⚠️ Новый пост на проверку: ⚠️\n\n"
+                                                     f"{new_post.text}",
+                                             reply_markup=approve_message(new_post))
 
                 else:
                     await bot.send_message(settings.admin.id_,

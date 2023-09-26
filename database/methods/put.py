@@ -7,6 +7,7 @@ from database.main import async_session_maker
 from database.models.channel import Channel
 from database.models.media import Media
 from database.models.modify_post import ModifyPost
+from database.models.openai import Openai
 from database.models.posts import Post
 from database.models.user import User
 
@@ -25,6 +26,23 @@ async def update_post_by_post_id(post_id: int, data: dict):
             await s.commit()
 
             logging.info(f"item update POST ID: {post_id}"
+                         f"in data base {dt.datetime.utcnow()}")
+
+
+async def update_prompt(prompt_id: int, data: dict):
+
+    async with async_session_maker() as s:
+
+        async with s.begin():
+            q = update(
+                Openai)\
+                .filter(Openai.id == prompt_id)\
+                .values(data)\
+                .execution_options(synchronize_session="fetch")
+            await s.execute(q)
+            await s.commit()
+
+            logging.info(f"item update POST ID: {prompt_id}"
                          f"in data base {dt.datetime.utcnow()}")
 
 

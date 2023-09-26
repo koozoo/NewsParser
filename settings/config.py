@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
+
 load_dotenv()
 
 
@@ -150,12 +151,7 @@ class Settings:
     def _get_project_const(self) -> ProjectData:
         return ProjectData(main_url="http://t.me",
                            channel_id=1855021356,
-                           default_prompt="Вам будет дана статья или сообщение для переработки. Ваша цель - "
-                                          "переписать содержание, сохраняя"
-                                          "ясность и краткость, сохраняя при этом оригинальный смысл. Ваш "
-                                          "переписанный контент должен быть"
-                                          f"увлекательным и легким для чтения. Так же необходимо,"
-                                          f" очистить текст от всех слов содержащих знаки # и @. Вот статья:",
+                           default_prompt="",
                            root=os.environ['PWD'])
 
     def get_settings(self) -> SettingsData:

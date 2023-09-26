@@ -7,6 +7,7 @@ from bot.handlers import register_handlers
 from scheduler.main import scheduler
 from services.main import Service
 from services.telegram_parser.main import client as telegram_parser
+from settings.prompt import prompt
 
 
 async def _register_all_handlers(dp: Dispatcher):
@@ -28,6 +29,10 @@ async def _run_all_sub_services():
     scheduler.start()
 
 
+async def set_config():
+    await prompt()
+
+
 async def start_bot():
     logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
     bot = Bot(token=settings.bot.token, parse_mode='HTML')
@@ -35,6 +40,7 @@ async def start_bot():
     dp = Dispatcher()
     await _register_all_handlers(dp=dp)
     await _register_global_task(dp=dp, bot=bot)
+    await set_config()
     dp.startup.register(_run_all_sub_services)
 
     try:

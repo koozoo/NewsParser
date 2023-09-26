@@ -16,7 +16,7 @@ from services.telegram_parser.add_posts import AddPosts
 from settings.config import settings
 from scheduler.main import scheduler
 
-client = TelegramClient('9165798836',
+client = TelegramClient('9165797221',
                         settings.telegram_parser.api_id,
                         settings.telegram_parser.api_hash)
 
@@ -190,8 +190,12 @@ class TelegramParser:
 
         await add_post.init_add_new_posts()
 
-    async def _get_full_channel_info(self, entity):
-        return await self._cli(GetFullChannelRequest(channel=entity))
+    async def get_full_channel_info(self, entity=None, link=None):
+        if entity is not None:
+            return await self._cli(GetFullChannelRequest(channel=entity))
+        else:
+            entity_ = await self._cli.get_entity(entity=link)
+            return await self._cli(GetFullChannelRequest(channel=entity_))
 
     async def start_parsing(self):
 
@@ -204,7 +208,7 @@ class TelegramParser:
                     entity_to_dict = entity.to_dict()
 
                     if entity_to_dict['_'] == "Channel":
-                        channel_info = await self._get_full_channel_info(entity=entity)
+                        channel_info = await self.get_full_channel_info(entity=entity)
                         await self._join_to_channel(entity=entity, channel=channel, channel_info=channel_info.to_dict())
 
                         await self._get_limited_messages(entity=entity)

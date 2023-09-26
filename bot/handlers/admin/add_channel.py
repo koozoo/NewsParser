@@ -2,7 +2,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 
-
 from bot.keyboards.reply import yes_no
 from bot.handlers.utils import is_email
 from database.methods.main import Database
@@ -95,3 +94,4 @@ class InterfaceFsmUrl:
         except Exception as e:
             print(e)
             await context.message.delete()
+

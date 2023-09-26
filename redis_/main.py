@@ -1,3 +1,5 @@
+import datetime
+
 import redis
 import settings as config
 
@@ -42,10 +44,18 @@ class RedisClient:
 
     async def get_cache_user_by_id(self, user_id: int):
         with self._connect_redis() as redis_cli:
-            await redis_cli.hgetall(f"user:{user_id}")
+            return redis_cli.hgetall(f"user:{user_id}")
 
     async def set_cache_user_by_id(self, user_id: int, data: dict):
         with self._connect_redis() as redis_cli:
+
             for key, value in data.items():
 
-                await redis_cli.hset(f"user:{user_id}", key=key, value=value)
+                if value is True:
+                    value = 1
+                elif value is False:
+                    value = 0
+                elif isinstance(value, datetime.datetime):
+                    value = str(value)
+
+                redis_cli.hset(f"user:{user_id}", key=key, value=value)

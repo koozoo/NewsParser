@@ -4,6 +4,7 @@ from database.main import async_session_maker
 from database.models.channel import Channel
 from database.models.media import Media
 from database.models.modify_post import ModifyPost
+from database.models.openai import Openai
 from database.models.posts import Post
 from database.models.user import User
 
@@ -59,7 +60,6 @@ async def get_posts_for_approve_post():
 
 
 async def get_posts_for_published_post(message_id: int, channel_id: int):
-    print(message_id, channel_id)
     async with async_session_maker() as s:
         q = select(Post).filter(and_(Post.message_id == message_id,
                                      Post.channel_id == channel_id,
@@ -113,6 +113,14 @@ async def get_all_admin_():
 async def get_media_for_delete():
     async with async_session_maker() as s:
         q = select(Media).filter(Media.file_name == "delete")
+        data = await s.execute(q)
+        curr = data.scalars()
+    return curr
+
+
+async def get_prompt():
+    async with async_session_maker() as s:
+        q = select(Openai)
         data = await s.execute(q)
         curr = data.scalars()
     return curr

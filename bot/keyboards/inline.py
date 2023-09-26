@@ -1,28 +1,52 @@
 from aiogram.types import InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
 from database.models.modify_post import ModifyPostData
 
 
-def admin_menu():
+def admin_menu(msg_id: int = 0) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    b_add = InlineKeyboardButton(text="🖍 Добавить канал", callback_data="ADMIN_add_chanel")
-    b_right = InlineKeyboardButton(text="🔐 Права доступа", callback_data="ADMIN_rights")
-    b_channel_id = InlineKeyboardButton(text="🔢 Узнать id канала", callback_data="TOOL_GetChannelId")
-    b_profile = InlineKeyboardButton(text="📋 Профиль", callback_data="PROFILE_admin")
+    b_right = InlineKeyboardButton(text="🔐 Права доступа", callback_data=f"fADMIN_rights_{msg_id}")
+    b_prompt = InlineKeyboardButton(text="🔁 Обновить prompt", callback_data=f"PROMPT_update_{msg_id}")
+    b_profile = InlineKeyboardButton(text="📋 Профиль", callback_data=f"PROFILE_admin_{msg_id}")
+    b_channel_ = InlineKeyboardButton(text="🎛 Управление каналом", callback_data=f"CHANNEL_{msg_id}")
 
-    builder.row(b_add).row(b_right, b_channel_id).row(b_profile)
+    builder.row(b_right).row(b_prompt).row(b_channel_).row(b_profile)
 
     return builder.as_markup()
 
 
-def admin_rights_menu():
+def channel_back_to_admin_menu(msg_id: int):
+    builder = InlineKeyboardBuilder()
+
+    b_back_to_main_admin_menu = InlineKeyboardButton(text="↩️ Назад", callback_data=f"CHANNEL_back_{msg_id}")
+
+    builder.row(b_back_to_main_admin_menu)
+
+    return builder.as_markup()
+
+
+def channel_menu(msg_id: int):
+    builder = InlineKeyboardBuilder()
+
+    b_add = InlineKeyboardButton(text="🖍 Добавить канал", callback_data=f"ADMIN_add_chanel_{msg_id}")
+    b_channel_id = InlineKeyboardButton(text="🔢 Узнать id канала", callback_data=f"CHANNEL_get:id_{msg_id}")
+    b_channel_all = InlineKeyboardButton(text="📜 Все каналы", callback_data=f"CHANNEL_get:all_{msg_id}")
+    b_delete_channel = InlineKeyboardButton(text="❌ Удалить канал", callback_data=f"ADMIN_delete_{msg_id}")
+    b_back = InlineKeyboardButton(text="↩️ Назад", callback_data=f"CHANNEL_back_{msg_id}")
+
+    builder.row(b_add).row(b_delete_channel).row(b_channel_all).row(b_channel_id).row(b_back)
+
+    return builder.as_markup()
+
+
+def admin_rights_menu(msg_id: int):
     bts = {
-        "Добавить админа": "ADMIN_rights_add",
-        "Удалить админа": "ADMIN_rights_delete",
-        "Удалить всех админов": "ADMIN_rights_delete:all",
-        "Назад": "ADMIN_menu"
+        "Добавить админа": f"ADMIN_rights_add_{msg_id}",
+        "Удалить админа": f"ADMIN_rights_delete_{msg_id}",
+        "Удалить всех админов": f"ADMIN_rights_delete:all_{msg_id}",
+        "Назад": f"ADMIN_menu_{msg_id}"
     }
 
     builder = InlineKeyboardBuilder()
@@ -37,10 +61,10 @@ def admin_rights_menu():
     return builder.as_markup()
     
 
-def user_menu():
+def user_menu(msg_id: int = 0):
     bts = {
-        "Написать админу": "USER_send",
-        "Профиль": "PROFILE_user"
+        "Написать админу": f"USER_send_{msg_id}",
+        "Профиfль": f"PROFILE_user_{msg_id}"
     }
 
     builder = InlineKeyboardBuilder()
