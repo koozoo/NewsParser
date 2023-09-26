@@ -5,12 +5,14 @@ from database.methods.get import (get_channel_by_id, \
                                   get_all_users, get_user_by_id, get_all_channels,
                                   get_channel_by_link, get_posts_for_compare, get_posts_for_openai,
                                   get_posts_for_approve_post, get_posts_for_published_post, get_photo, get_mod_post,
-                                  get_post, get_all_admin_)
+                                  get_post, get_all_admin_, get_prompt)
 from database.methods.put import (update_post_by_post_id, update_user_by_id, update_channel_by_id,
-                                  update_modify_post_by_post_id, update_media_by_media_id)
+                                  update_modify_post_by_post_id, update_media_by_media_id, update_prompt)
+from database.methods.delete import delete_channel_by_id
 from database.models.channel import ChannelData, Channel
 from database.models.media import MediaData
 from database.models.modify_post import ModifyPostData
+from database.models.openai import OpenaiData
 from database.models.posts import Post, PostData
 from database.models.user import UserData, User
 from settings.config import settings
@@ -147,3 +149,17 @@ class Database:
 
     async def get_all_admin(self):
         return [item.id for item in await get_all_admin_() if item.id != settings.admin.id_]
+
+    async def get_all_channel(self):
+        return
+
+    async def get_prompt_(self):
+        return [OpenaiData(id=item.id, prompt=item.prompt, type=item.type)for item in await get_prompt()]
+
+    async def update_prompt(self, prompt_id: int, data: dict):
+        await update_prompt(prompt_id=prompt_id, data=data)
+
+    async def delete_channel(self, channel_id: int):
+        print("channel_id", channel_id)
+        print("channel_id type: ", type(channel_id))
+        await delete_channel_by_id(channel_id=channel_id)

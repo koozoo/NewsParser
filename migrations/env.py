@@ -13,6 +13,7 @@ from database.models.posts import metadata as posts_metadata
 from database.models.modify_post import metadata as modify_post_metadata
 from database.models.channel import metadata as channel_metadata
 from database.models.media import metadata as media_metadata
+from database.models.openai import metadata as openai_metadata
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 
@@ -40,7 +41,8 @@ target_metadata = [user_metadata,
                    posts_metadata,
                    modify_post_metadata,
                    channel_metadata,
-                   media_metadata]
+                   media_metadata,
+                   openai_metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

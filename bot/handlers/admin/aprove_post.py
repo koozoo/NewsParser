@@ -96,6 +96,8 @@ class ApprovePost:
                     update_data = {
                         "file_name": "delete"
                     }
+
+                    print("media in approve psot ", media)
                     await self.database.update_media(media_id=media['data'].id, data=update_data)
 
     async def _reject(self, data):
