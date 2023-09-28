@@ -104,7 +104,7 @@ async def get_all_users():
 
 async def get_all_admin_():
     async with async_session_maker() as s:
-        q = select(User).filter(User.is_admin == True)
+        q = select(User).filter(User.is_admin is True)
         data = await s.execute(q)
         curr = data.scalars()
     return curr

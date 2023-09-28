@@ -160,6 +160,4 @@ class Database:
         await update_prompt(prompt_id=prompt_id, data=data)
 
     async def delete_channel(self, channel_id: int):
-        print("channel_id", channel_id)
-        print("channel_id type: ", type(channel_id))
         await delete_channel_by_id(channel_id=channel_id)
