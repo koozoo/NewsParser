@@ -16,13 +16,14 @@ class OpenAiApi:
     async def run_job(self, data: PostData) -> None:
 
         new_text = await self._send_request(text=data['text'])
+        new_text += f"\n\n<a href='{settings.project_const.main_url}'>" \
+                    f"{settings.project_const.title}</a>"
 
         update_data = {
             "state": "await",
         }
 
         await self.database.update_post(post_id=data['id'], data=update_data)
-        print(data)
         mod_text_entity = ModifyPostData(post_id=data['message_id'],
                                          text=new_text,
                                          channel_id=data['channel_id'],

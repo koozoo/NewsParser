@@ -75,7 +75,6 @@ class InterfaceFsmDelete:
 
         if answer.get('answer') == "да":
             data = await state.get_data()
-            print(data)
             if [item.id for item in await db.get_channel(channel_id=data['channel_id'])]:
 
                 scheduler.add_job(db.delete_channel, kwargs={"channel_id": data['channel_id']})

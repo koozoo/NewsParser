@@ -86,6 +86,7 @@ class OpenAiData(BaseModel):
 class ProjectData(BaseModel):
     main_url: str
     channel_id: int
+    title: str
     root: str
     default_prompt: str
     support_group_url: str = None
@@ -151,6 +152,7 @@ class Settings:
     def _get_project_const(self) -> ProjectData:
         return ProjectData(main_url="http://t.me",
                            channel_id=1855021356,
+                           title="@news_parser_test",
                            default_prompt="",
                            root=os.environ['PWD'])
 

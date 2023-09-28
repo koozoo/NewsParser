@@ -12,6 +12,7 @@ class Cache:
     async def get_user(self, user_id: int):
 
         user = await self._redis_cli.get_cache_user_by_id(user_id=user_id)
+
         if user:
             return UserData(id=user['id'],
                             active_msg_id=user['active_msg_id'],

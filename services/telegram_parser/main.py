@@ -166,7 +166,7 @@ class TelegramParser:
         media_data = []
 
         async for msg in self._cli.iter_messages(entity=entity, limit=limit):
-
+            # TODO очистить от print
             try:
                 post_ = await self._create_post_entity(message_data=msg.to_dict())
 

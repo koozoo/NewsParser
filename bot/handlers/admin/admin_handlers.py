@@ -7,6 +7,7 @@ from .add_channel import InterfaceFsmUrl, UrlAction
 from .aprove_post import ApprovePost
 from .access_rights_management import AccessManagement, AccessManagementFSM, AccessAction
 from .delete_channel import InterfaceFsmDelete, DeleteAction
+from .update_prompt import PromptManagementFSM, PromptAction
 from .channel_ import ChannelMenu
 from .update_prompt import Prompt
 
@@ -18,13 +19,12 @@ async def init_approve(call: CallbackQuery):
 
 async def init_access_rights(call: CallbackQuery, state: FSMContext):
     entity = AccessManagement(context=call)
-    await state.set_data({"init": "test"})
     await entity.command_router(state=state)
 
 
-async def init_update_prompt(call: CallbackQuery):
+async def init_update_prompt(call: CallbackQuery, state: FSMContext):
     entity = Prompt(context=call)
-    await entity.init_prompt()
+    await entity.init_prompt(state=state)
 
 
 async def init_channel(call: CallbackQuery):
@@ -74,4 +74,16 @@ async def register_admin_handlers(dp: Dispatcher):
 
     dp.message.register(InterfaceFsmDelete.process_finish,
                         DeleteAction.finish,
+                        lambda msg: msg.text.casefold() in ["да", "нет"])
+
+    # PROMPT UPDATE
+    dp.callback_query.register(init_update_prompt,
+                               F.data.startswith("PROMPT"))
+
+    dp.message.register(PromptManagementFSM.prompt_process,
+                        PromptAction.pr,
+                        lambda msg: msg.text)
+
+    dp.message.register(PromptManagementFSM.finish_process,
+                        PromptAction.finish,
                         lambda msg: msg.text.casefold() in ["да", "нет"])

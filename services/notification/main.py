@@ -37,7 +37,8 @@ class Notification:
                 else:
                     await bot.send_message(settings.admin.id_,
                                            text="⚠️ Новый пост на проверку: ⚠️\n\n"
-                                                f"{new_post.text}", reply_markup=approve_message(new_post))
+                                                f"{new_post.text}",
+                                           reply_markup=approve_message(new_post))
 
             for post in update_data:
                 for k, v in post.items():
