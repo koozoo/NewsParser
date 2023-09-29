@@ -59,3 +59,11 @@ class RedisClient:
                     value = str(value)
 
                 redis_cli.hset(f"user:{user_id}", key=key, value=value)
+
+    def get_all_admins_id(self):
+        with self._connect_redis() as redis_cli:
+            return redis_cli.lrange(f"admins", 0, -1)
+
+    def set_all_admins_id(self, data):
+        with self._connect_redis() as redis_cli:
+            redis_cli.rpush(f"admins", data)

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from .add_channel import InterfaceFsmUrl, UrlAction
-from .aprove_post import ApprovePost
+from .aprove_post import ApprovePost, EditAction, EditPost
 from .access_rights_management import AccessManagement, AccessManagementFSM, AccessAction
 from .delete_channel import InterfaceFsmDelete, DeleteAction
 from .update_prompt import PromptManagementFSM, PromptAction
@@ -12,9 +12,13 @@ from .channel_ import ChannelMenu
 from .update_prompt import Prompt
 
 
-async def init_approve(call: CallbackQuery):
-    entity = ApprovePost(callback=call.data, context=call)
-    await entity.type_router()
+async def init_approve(call: CallbackQuery, state: FSMContext | None):
+    if isinstance(state, FSMContext):
+        entity = ApprovePost(callback=call.data, context=call, state=state)
+        await entity.type_router()
+    else:
+        entity = ApprovePost(callback=call.data, context=call)
+        await entity.type_router()
 
 
 async def init_access_rights(call: CallbackQuery, state: FSMContext):
@@ -86,4 +90,14 @@ async def register_admin_handlers(dp: Dispatcher):
 
     dp.message.register(PromptManagementFSM.finish_process,
                         PromptAction.finish,
+                        lambda msg: msg.text.casefold() in ["да", "нет"])
+
+    # EDIT POST
+
+    dp.message.register(EditPost.edit_process,
+                        EditAction.edit,
+                        lambda msg: msg.text)
+
+    dp.message.register(EditPost.finish_process,
+                        EditAction.finish,
                         lambda msg: msg.text.casefold() in ["да", "нет"])

@@ -1,8 +1,12 @@
 import os
 
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery, FSInputFile, Message
 
-from database.models.media import MediaData
+from bot.keyboards.inline import edit_menu, admin_menu
+from bot.keyboards.reply import yes_no
+from bot.view.main import View
 from scheduler.main import scheduler
 from database.methods.main import Database
 from services.cache.cache import Cache
@@ -34,13 +38,83 @@ class PublishPost:
             await self._send_media(post=post, media=media)
 
 
+class EditAction(StatesGroup):
+    edit = State()
+    finish = State()
+
+
+class EditPost:
+
+    @staticmethod
+    async def init_edit(context: CallbackQuery, state: FSMContext, callback_data: list):
+        view = View(context)
+        database = Database()
+        callback_data = callback_data[2].split(":")
+        channel_id = int(callback_data[2])
+        message_id = int(callback_data[1])
+
+        post = await database.get_mod_post_by_message_id_and_channel_id_(message_id=message_id,
+                                                                         channel_id=channel_id)
+
+        await state.set_state(EditAction.edit)
+
+        await view.delete_message()
+        msg_entity = await context.message.answer(text="Введите новый текст",
+                                                  reply_markup=edit_menu(text=post[0].text))
+        await state.update_data(msg_id=msg_entity.message_id,
+                                text=post[0].text,
+                                channel_id=channel_id,
+                                message_id=message_id,
+                                mod_post_id=post[0].id)
+
+    @staticmethod
+    async def edit_process(message: Message, state: FSMContext):
+        view = View(message)
+        new_text = message.text
+        data = await state.get_data()
+        await state.update_data(new_text=new_text)
+        await state.set_state(EditAction.finish)
+
+        await view.delete_message()
+        await view.delete_message(data['msg_id'])
+
+        msg_entity = await message.answer(text="Проверьте текст и подтвердите:\n\n"
+                                               f"{new_text}", reply_markup=yes_no())
+        await state.update_data(msg_id=msg_entity.message_id)
+
+    @staticmethod
+    async def finish_process(message: Message, state: FSMContext):
+        answer = message.text.casefold()
+        data = await state.get_data()
+        view = View(message)
+        database = Database()
+
+        await view.delete_message()
+        await view.delete_message(data['msg_id'])
+
+        if answer == "да":
+            await database.update_mod_post(post_id=data['mod_post_id'], data={"text": data['new_text'],
+                                                                              "approve_state": 'new'})
+
+            await view.print_message(text="Пост успешно изменен.", kb=admin_menu)
+
+            await state.clear()
+        else:
+            await state.set_state(EditAction.edit)
+
+            msg_entity = await message.answer(text="Введите новый текст",
+                                              reply_markup=edit_menu(text=data['text']))
+            await state.update_data(msg_id=msg_entity.message_id)
+
+
 class ApprovePost:
 
-    def __init__(self, callback: str, context: CallbackQuery):
+    def __init__(self, callback: str, context: CallbackQuery, state: FSMContext | None = None):
         self.callback = callback
         self.context = context
         self.database = Database()
         self.cache = Cache()
+        self.state = state
 
     async def _del_msg(self):
         try:
@@ -97,7 +171,7 @@ class ApprovePost:
                         "file_name": "delete"
                     }
 
-                    print("media in approve psot ", media)
+                    print("media in approve post ", media)
                     await self.database.update_media(media_id=media['data'].id, data=update_data)
 
     async def _reject(self, data):
@@ -172,5 +246,7 @@ class ApprovePost:
                 await self._reject(data_for_event)
             case "repeat":
                 await self._repeat(data_for_event)
+            case "edit":
+                await EditPost().init_edit(context=self.context, state=self.state, callback_data=callback_data)
             case "_":
                 "error"
