@@ -2,8 +2,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 
+from bot.keyboards.inline import admin_menu
 from bot.keyboards.reply import yes_no
 from bot.handlers.utils import is_email
+from bot.view.main import View
 from database.methods.main import Database
 from database.models.channel import ChannelData
 from scheduler.main import scheduler
@@ -39,29 +41,44 @@ class InterfaceFsmUrl:
     async def init_action_url(call: CallbackQuery, state: FSMContext):
         await state.set_state(UrlAction.url)
 
-        await call.message.answer(text=await text_messages(query="init"))
+        msg_entity = await call.message.answer(text=await text_messages(query="init"))
+        await state.update_data(msg_id=msg_entity.message_id)
 
     @staticmethod
     async def process_url(message: Message, state: FSMContext):
         await state.update_data(url=message.text)
+        view = View(message)
+        data = await state.get_data()
 
-        await InterfaceFsmUrl.delete_message(message)
+        await view.delete_message()
+        await view.delete_message(data['msg_id'])
 
         data = await state.get_data()
         await state.set_state(UrlAction.finish)
-        await message.answer(text=await text_messages(query="process_url", url=data.get('url')),
-                             reply_markup=yes_no())
+        msg_entity = await message.answer(text=await text_messages(query="process_url", url=data.get('url')),
+                                          reply_markup=yes_no())
+        await state.update_data(msg_id=msg_entity.message_id)
 
     @staticmethod
-    async def filed_process_url(message: Message):
-        await InterfaceFsmUrl.delete_message(message)
-        await message.answer(text=await text_messages(query="filed_process_url"))
+    async def filed_process_url(message: Message, state: FSMContext):
+        view = View(message)
+        data = await state.get_data()
+
+        await view.delete_message()
+        await view.delete_message(data['msg_id'])
+
+        msg_entity = await message.answer(text=await text_messages(query="filed_process_url"))
+        await state.update_data(msg_id=msg_entity.message_id)
 
     @staticmethod
     async def process_finish(message: Message, state: FSMContext):
         db = Database()
         answer = await state.update_data(answer=message.text.casefold())
-        await InterfaceFsmUrl.delete_message(message)
+        view = View(message)
+        data = await state.get_data()
+
+        await view.delete_message()
+        await view.delete_message(data['msg_id'])
 
         if answer.get('answer') == "да":
             data = await state.get_data()
@@ -71,27 +88,14 @@ class InterfaceFsmUrl:
             if not await db.get_channel_by_link(link=data['url']):
                 scheduler.add_job(db.add_channel, kwargs={"channel_data": channel_data})
 
-                await message.answer(text=await text_messages(query="process_finish", url=data.get('url')),
-                                     reply_markup=ReplyKeyboardRemove())
+                await view.print_message(text=await text_messages(query="process_finish", url=data.get('url')),
+                                         kb=admin_menu)
             else:
-                await message.answer(text=await text_messages(query="process_finish_error", url=data.get('url')),
-                                     reply_markup=ReplyKeyboardRemove())
+                await view.print_message(text=await text_messages(query="process_finish_error", url=data.get('url')),
+                                         kb=admin_menu)
             await state.clear()
         else:
             await state.set_state(UrlAction.url)
-            await message.answer(text=await text_messages(query="init"),
-                                 reply_markup=ReplyKeyboardRemove())
-
-    @staticmethod
-    def check_email(text):
-        return (False, True)[is_email(text) is not None]
-
-    @staticmethod
-    async def delete_message(context: Message | CallbackQuery):
-
-        try:
-            await context.delete()
-        except Exception as e:
-            print(e)
-            await context.message.delete()
-
+            msg_entity = await message.answer(text=await text_messages(query="init"),
+                                              reply_markup=ReplyKeyboardRemove())
+            await state.update_data(msg_id=msg_entity.message_id)

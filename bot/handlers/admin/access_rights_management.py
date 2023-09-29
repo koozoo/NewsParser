@@ -7,6 +7,7 @@ from bot.keyboards.reply import yes_no
 from bot.view.main import View
 from database.methods.main import Database
 from scheduler.main import scheduler
+from services.cache.cache import Cache
 
 
 class AccessAction(StatesGroup):
@@ -94,40 +95,51 @@ class AccessManagementFSM:
 
 class AccessManagement:
     def __init__(self, context: CallbackQuery = None):
-        self.context = context
-        self.database = Database()
+        self._context = context
+        self._database = Database()
+        self._cache = Cache()
+        self._view = View(context)
 
     async def _init_add_admin(self, state):
-        await AccessManagementFSM.init_action(type_="add", context=self.context, state=state)
+        await AccessManagementFSM.init_action(type_="add", context=self._context, state=state)
 
     async def _init_delete_admin(self, state):
-        await AccessManagementFSM.init_action(type_="delete", context=self.context, state=state)
+        await AccessManagementFSM.init_action(type_="delete", context=self._context, state=state)
+
+    async def _all_admins(self):
+        admins = await self._cache.get_admins()
+        text = "Список всех администраторов:\n\n"
+
+        for admin in admins:
+            text += f"ID: {admin.id}, NAME: {admin.name}\n\n"
+
+        await self._view.print_message(text=text, kb=channel_back_to_admin_menu)
 
     async def _delete_all_admin(self):
-        admins = await self.database.get_all_admin()
-        view = View(self.context)
+        admins = await self._database.get_all_admin()
+        view = View(self._context)
         for admin_id in admins:
             update_access_admin = {
                 "is_admin": False
             }
 
-            await self.database.update_user(user_id=admin_id, update_data=update_access_admin)
+            await self._database.update_user(user_id=admin_id, update_data=update_access_admin)
         await view.print_message(text="Все администраторы были удалены.", kb=admin_menu)
 
     async def add_admin(self, id_: int):
         update_data = {
             "is_admin": True
         }
-        scheduler.add_job(self.database.update_user, kwargs={"user_id": id_, "update_data": update_data})
+        scheduler.add_job(self._database.update_user, kwargs={"user_id": id_, "update_data": update_data})
 
     async def delete_admin(self, id_: int):
         update_data = {
             "is_admin": False
         }
-        scheduler.add_job(self.database.update_user, kwargs={"user_id": id_, "update_data": update_data})
+        scheduler.add_job(self._database.update_user, kwargs={"user_id": id_, "update_data": update_data})
 
     async def command_router(self, state: FSMContext):
-        callback_data = self.context.data.split("_")
+        callback_data = self._context.data.split("_")
         if len(callback_data) > 3:
 
             match callback_data[2]:
@@ -137,8 +149,10 @@ class AccessManagement:
                     await self._init_delete_admin(state=state)
                 case "delete:all":
                     await self._delete_all_admin()
+                case "get:all":
+                    await self._all_admins()
                 case "_":
                     return "Command not find"
         else:
-            view = View(self.context)
+            view = View(self._context)
             await view.print_message(text=await text_messages(query="menu"), kb=admin_rights_menu)
