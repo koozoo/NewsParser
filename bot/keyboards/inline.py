@@ -9,10 +9,10 @@ def admin_menu(msg_id: int = 0) -> InlineKeyboardMarkup:
 
     b_right = InlineKeyboardButton(text="🔐 Права доступа", callback_data=f"ADMIN_rights_{msg_id}")
     b_prompt = InlineKeyboardButton(text="🔁 Обновить prompt", callback_data=f"PROMPT_update_{msg_id}")
-    b_profile = InlineKeyboardButton(text="📋 Профиль", callback_data=f"PROFILE_admin_{msg_id}")
+    # b_profile = InlineKeyboardButton(text="📋 Профиль", callback_data=f"PROFILE_admin_{msg_id}")
     b_channel_ = InlineKeyboardButton(text="🎛 Управление каналом", callback_data=f"CHANNEL_{msg_id}")
 
-    builder.row(b_right).row(b_prompt).row(b_channel_).row(b_profile)
+    builder.row(b_right).row(b_prompt).row(b_channel_)
 
     return builder.as_markup()
 
@@ -21,6 +21,16 @@ def channel_back_to_admin_menu(msg_id: int):
     builder = InlineKeyboardBuilder()
 
     b_back_to_main_admin_menu = InlineKeyboardButton(text="⬅️ Меню", callback_data=f"CHANNEL_back_{msg_id}")
+
+    builder.row(b_back_to_main_admin_menu)
+
+    return builder.as_markup()
+
+
+def close():
+    builder = InlineKeyboardBuilder()
+
+    b_back_to_main_admin_menu = InlineKeyboardButton(text="❌ Закрыть", callback_data=f"CLOSE")
 
     builder.row(b_back_to_main_admin_menu)
 

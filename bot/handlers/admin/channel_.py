@@ -1,7 +1,7 @@
 from aiogram.fsm.context import FSMContext
 
 from bot.handlers.admin.delete_channel import InterfaceFsmDelete, DeleteAction
-from bot.keyboards.inline import admin_menu, channel_back_to_admin_menu, channel_menu
+from bot.keyboards.inline import admin_menu, channel_back_to_admin_menu, channel_menu, close
 from bot.view.main import View
 from services.telegram_parser.main import TelegramParser
 from database.methods.main import Database
@@ -17,7 +17,7 @@ class ChannelMenu:
 
     async def _all(self):
         text = await self._get_text_all_channel()
-        kb = channel_back_to_admin_menu
+        kb = close
         return text, kb
 
     async def _back(self):
@@ -51,7 +51,9 @@ class ChannelMenu:
 
                 match link_data[1]:
                     case "all":
-                        result_data['text'], result_data['kb'] = await self._all()
+                        # result_data['text'], result_data['kb'] = await self._all()
+                        text, kb = await self._all()
+                        await self.context.message.answer(text=text, reply_markup=kb())
                     case "id":
                         ...
             elif link[1] == 'back':
@@ -63,8 +65,8 @@ class ChannelMenu:
 
     async def _get_text_all_channel(self):
         result = ''
-        for i, channel in enumerate(await self._database.get_channels()):
-            result += f"{i + 1}: ID: {channel.id} - LINK: {channel.link}\n"
+        for channel in await self._database.get_channels():
+            result += f"ID: {channel.id} | LINK: {channel.link}\n"
         return result
 
     async def start(self):
@@ -72,7 +74,10 @@ class ChannelMenu:
 
         view_data = await self._route(link=callback_data)
 
-        text = view_data.get('text', f"Привет {self.context.from_user.full_name}.\n" + f"Права доступа: Администратор")
-        kb = view_data.get('kb', admin_menu)
+        if view_data:
+            text = view_data.get('text', f"Привет {self.context.from_user.full_name}.\n"
+                                 + f"Права доступа: Администратор")
+            kb = view_data.get('kb', admin_menu)
 
-        await self.view.print_message(text=text, kb=kb)
+            await self.view.print_message(text=text, kb=kb)
+

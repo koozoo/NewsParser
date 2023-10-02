@@ -45,4 +45,5 @@ class OpenAiApi:
             return r.choices[0].message['content']
         except Exception as e:
             print(e)
-            return "Ошибка при отправке запроса."
+            return ("ChatGPT: Ошибка при отправке запроса.\n\n"
+                    f"Original raise: {e}")

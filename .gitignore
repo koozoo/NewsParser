@@ -1,0 +1,8 @@
+static/
+*.env
+*.session
+
+/shelf/
+/workspace.xml
+
+*venv

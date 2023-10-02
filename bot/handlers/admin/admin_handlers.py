@@ -36,6 +36,10 @@ async def init_channel(call: CallbackQuery):
     await channel_menu_entity.start()
 
 
+async def close(call: CallbackQuery):
+    await call.message.delete()
+
+
 async def register_admin_handlers(dp: Dispatcher):
     logging.info("REGISTER ALL ADMIN HANDLERS")
 
@@ -43,6 +47,7 @@ async def register_admin_handlers(dp: Dispatcher):
     dp.callback_query.register(init_access_rights, F.data.startswith("ADMIN_rights"))
     dp.callback_query.register(init_update_prompt, F.data.startswith("PROMPT"))
     dp.callback_query.register(init_channel, F.data.startswith("CHANNEL"))
+    dp.callback_query.register(close, F.data.startswith("CLOSE"))
 
     # FSM ADD ADMIN
     dp.message.register(AccessManagementFSM.failed_admin_id_process, AccessAction.admin_id,

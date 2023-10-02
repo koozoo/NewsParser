@@ -27,15 +27,13 @@ class DatabaseData(BaseModel):
 class RedisData(BaseModel):
     host: str
     port: str
-    pass_: str = None
-    login: str = None
+    pass_: str | None
 
     def to_dict(self):
         return {
             "host": self.host,
             "port": self.port,
-            "pass_": self.pass_,
-            "login": self.login
+            "pass_": self.pass_
         }
 
 
@@ -120,8 +118,12 @@ class Settings:
     def _get_config_redis(self):
         redis_host = os.getenv("REDIS_HOST")
         redis_port = os.getenv("REDIS_PORT")
+        redis_pass = os.getenv("REDIS_PASS")
 
-        return RedisData(host=redis_host, port=redis_port)
+        if not redis_pass:
+            redis_pass = None
+
+        return RedisData(host=redis_host, port=redis_port, pass_=redis_pass)
 
     def _get_config_ui_bot_token(self):
         token = os.getenv("UiBotToken")
@@ -150,9 +152,9 @@ class Settings:
         return AdminData(id_=admin_id, email=admin_email)
 
     def _get_project_const(self) -> ProjectData:
-        return ProjectData(main_url="http://t.me",
+        return ProjectData(main_url="https://telegram.org/apps",
                            channel_id=1855021356,
-                           title="@news_parser_test",
+                           title="@news_parser_test2",
                            default_prompt="",
                            root=os.environ['PWD'])
 

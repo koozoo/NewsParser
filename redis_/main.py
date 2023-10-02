@@ -15,7 +15,8 @@ class RedisClient:
         self.socket_timeout = None
 
     def _connect_redis(self):
-        if self.password:
+        if self.password is not None:
+
             return redis.Redis(host=self.host,
                                port=self.port,
                                db=self.db,
@@ -23,6 +24,7 @@ class RedisClient:
                                decode_responses=True)
 
         else:
+            print("redis is None")
             return redis.Redis(host=self.host,
                                port=self.port,
                                db=self.db,
