@@ -1,3 +1,4 @@
+import datetime
 import datetime as dt
 from sqlalchemy import Column, BigInteger, String, Table, MetaData, Boolean
 from pydantic import BaseModel
@@ -10,15 +11,15 @@ class PostData(BaseModel):
     channel_id: int = 0
     message_id: int = 0
     title: str = "none"
-    date: str = dt.datetime.utcnow()
+    date: str | datetime.datetime = dt.datetime.utcnow()
     text: str
-    state: str = "new"  # для обработки задач для openAI
+    state: str = "new"
     modified_text: str = "none"
     type: str = "text"
     id: int = 0
-    url: str = "none" # для web parsing
-    published: bool = False # меняется после публикации
-    reject: bool = False # удалить из подбоки статью
+    url: str = "none"
+    published: bool = False
+    reject: bool = False
     media: dict = None
 
     def to_dict(self):
@@ -29,7 +30,6 @@ class PostData(BaseModel):
             "date": self.date,
             "text": self.text,
             "state": self.state,
-            # new(создано системой но в работу еще не запущено), pending(отправка в очередь для обработки текста), process(текст в обработке), await(ожидает подтверждения), done, closed
             "type": self.type,
             "modified_text": self.modified_text,
             "id": self.id,

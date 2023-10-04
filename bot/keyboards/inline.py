@@ -123,6 +123,9 @@ def approve_message(new_post: ModifyPostData):
     b_edit = InlineKeyboardButton(text="Редактировать 📝",
                                   callback_data=f"MESSAGE_edit_{new_post.id}:{new_post.post_id}"
                                                 f":{new_post.channel_id}")
+    b_edit = InlineKeyboardButton(text="Оригинальный текст ✅",
+                                  callback_data=f"MESSAGE_original_{new_post.id}:{new_post.post_id}"
+                                                f":{new_post.channel_id}")
 
     builder.row(b_approve).row(b_repeat, b_reject).row(b_edit)
 

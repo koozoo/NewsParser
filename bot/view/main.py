@@ -13,12 +13,29 @@ class View:
     async def print_message(self, text: str, kb, **kwarg) -> None:
         user = await self.cache.get_user(user_id=self.context.from_user.id)
 
-        if kwarg:
-            print(kwarg)
+        if user.is_admin:
+            if kwarg:
+                print(kwarg)
+            else:
+                try:
+                    await self.context.bot.edit_message_text(chat_id=self.chat_id, message_id=user.active_msg_id, text=text,
+                                                             reply_markup=kb(user.active_msg_id))
+                except Exception as e:
+                    print(e)
+                    await self.delete_message(user.active_msg_id)
+                    message_data = await self.context.bot.send_message(chat_id=self.chat_id, text=text,
+                                                                       reply_markup=kb(user.active_msg_id + 1))
+
+                    user.active_msg_id = message_data.message_id
+                    await self.cache.update_user(user=user)
         else:
             try:
-                await self.context.bot.edit_message_text(chat_id=self.chat_id, message_id=user.active_msg_id, text=text,
-                                                         reply_markup=kb(user.active_msg_id))
+                await self.context.bot.edit_message_text(chat_id=self.chat_id,
+                                                         message_id=user.active_msg_id,
+                                                         text=' ❗️ Доступ запрещен ❗️\n\n'
+                                                              'Обратитесь к главному администратору:\n\n'
+                                                              'ССЫЛКА ...\n'
+                                                              'Контакты: ...')
             except Exception as e:
                 print(e)
                 await self.delete_message(user.active_msg_id)

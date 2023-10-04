@@ -4,13 +4,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, FSInputFile, Message
 
-from bot.keyboards.inline import edit_menu, admin_menu
+from bot.keyboards.inline import edit_menu, admin_menu, close
 from bot.keyboards.reply import yes_no
 from bot.view.main import View
 from scheduler.main import scheduler
 from database.methods.main import Database
 from services.cache.cache import Cache
 from settings.config import settings
+import aiogram.utils.markdown as fmt
 
 
 class PublishPost:
@@ -28,7 +29,6 @@ class PublishPost:
 
     async def _send_media(self, post, **media):
         photo = FSInputFile(path=media['media']['data'].photo_path)
-        print(photo)
         await self.context.bot.send_photo(chat_id=f"-100{settings.project_const.channel_id}", photo=photo, caption=post)
 
     async def start(self, post, media=None):
@@ -146,7 +146,7 @@ class ApprovePost:
         update_data_mod_post = {
             "approve_state": "close"
         }
-
+        # TODO replace db on cache
         post = await self.database.get_post_(message_id=message_id, channel_id=channel_id)
 
         scheduler.add_job(self.database.update_post, kwargs={
@@ -164,7 +164,9 @@ class ApprovePost:
             publish = PublishPost(message_id=message_id, channel_id=channel_id, context=self.context, type_="text")
 
         if mod_text is not None:
+            mod_text += f"\n\n {fmt.text(settings.project_const.title, fmt.hide_link(settings.project_const.main_url))}"
             scheduler.add_job(publish.start, kwargs={"post": mod_text, "media": media})
+
             if post[0].type == "photo" or post[0].type == "web_page":
                 if media != 'none':
                     update_data = {
@@ -188,7 +190,7 @@ class ApprovePost:
         update_data_mod_post = {
             "approve_state": "reject"
         }
-
+        # TODO replace db on cache
         post = await self.database.get_post_(message_id=message_id, channel_id=channel_id)
 
         scheduler.add_job(self.database.update_post, kwargs={
@@ -221,7 +223,7 @@ class ApprovePost:
         update_data_mod_post = {
             "approve_state": "reject"
         }
-
+        # TODO replace db on cache
         post = await self.database.get_post_(message_id=message_id, channel_id=channel_id)
 
         scheduler.add_job(self.database.update_post, kwargs={
@@ -230,6 +232,16 @@ class ApprovePost:
         scheduler.add_job(self.database.update_mod_post, kwargs={
             "post_id": mod_post_id, "data": update_data_mod_post
         })
+
+    async def _original_text(self, callback_data):
+
+        post_in_db_id = int(callback_data[0])
+        message_id = int(callback_data[1])
+        channel_id = int(callback_data[2])
+
+        post = await self.cache.get_post(message_id=message_id, channel_id=channel_id)
+        await self.context.message.answer(text=f"❗️ Оригинальный текст ❗️\n\n{post.text}",
+                                          reply_markup=close())
 
     async def delete_photo(self, path: str):
         os.remove(path=path)
@@ -248,5 +260,7 @@ class ApprovePost:
                 await self._repeat(data_for_event)
             case "edit":
                 await EditPost().init_edit(context=self.context, state=self.state, callback_data=callback_data)
+            case "original":
+                await self._original_text(data_for_event)
             case "_":
                 "error"

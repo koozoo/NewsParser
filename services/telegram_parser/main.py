@@ -16,7 +16,7 @@ from services.telegram_parser.add_posts import AddPosts
 from settings.config import settings
 from scheduler.main import scheduler
 
-client = TelegramClient('9165797221',
+client = TelegramClient('9165798836',
                         settings.telegram_parser.api_id,
                         settings.telegram_parser.api_hash)
 

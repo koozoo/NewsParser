@@ -3,6 +3,7 @@ from database.models.posts import PostData
 from settings.config import settings
 from database.models.modify_post import ModifyPostData, ModifyPost
 import openai
+import aiogram.utils.markdown as fmt
 
 
 class OpenAiApi:
@@ -16,8 +17,6 @@ class OpenAiApi:
     async def run_job(self, data: PostData) -> None:
 
         new_text = await self._send_request(text=data['text'])
-        new_text += f"\n\n<a href='{settings.project_const.main_url}'>" \
-                    f"{settings.project_const.title}</a>"
 
         update_data = {
             "state": "await",

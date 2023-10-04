@@ -68,9 +68,9 @@ class AccessManagementFSM:
     async def finish_process(message: Message, state: FSMContext):
         await state.update_data(answer=message.text.casefold())
         data = await state.get_data()
-        entity = AccessManagement()
+        entity = AccessManagement(message)
         view = View(message)
-
+        cache = Cache()
         await view.delete_message(data['msg_id'])
         await view.delete_message()
 
@@ -80,10 +80,15 @@ class AccessManagementFSM:
                 await entity.add_admin(id_=int(data['id_']))
                 await view.print_message(text=await text_messages(query="finish_complete_add", id=data['id_'],
                                                                   name=message.from_user.full_name), kb=admin_menu)
+                await cache.update_state_admins()
             elif data['type'] == "delete":
                 await entity.delete_admin(id_=int(data['id_']))
+                user = await cache.get_user(user_id=data['id_'])
+                user.is_admin = False
+                await cache.update_user(user=user)
                 await view.print_message(text=await text_messages(query="finish_complete_delete", id=data['id_'],
                                                                   name=message.from_user.full_name), kb=admin_menu)
+                await cache.update_state_admins()
             else:
                 print("error")
 
@@ -94,7 +99,7 @@ class AccessManagementFSM:
 
 
 class AccessManagement:
-    def __init__(self, context: CallbackQuery = None):
+    def __init__(self, context: CallbackQuery | Message = None):
         self._context = context
         self._database = Database()
         self._cache = Cache()
@@ -136,6 +141,7 @@ class AccessManagement:
         update_data = {
             "is_admin": False
         }
+
         scheduler.add_job(self._database.update_user, kwargs={"user_id": id_, "update_data": update_data})
 
     async def command_router(self, state: FSMContext):

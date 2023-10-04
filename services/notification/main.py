@@ -4,6 +4,7 @@ from aiogram.types import FSInputFile
 from database.methods.main import Database
 from settings.config import settings
 from bot.keyboards.inline import approve_message
+import aiogram.utils.markdown as fmt
 
 
 class Notification:
@@ -23,13 +24,6 @@ class Notification:
                 unit = {new_post.id: new_post.approve_state}
                 update_data.append(unit)
 
-                original_text = await self.database.get_post_(message_id=new_post.post_id, channel_id=new_post.channel_id)
-
-                if original_text:
-                    text = original_text[0].text
-                else:
-                    text = ""
-
                 if new_post.type == "photo" or new_post.type == "wep_page":
 
                     photo_data = await self.database.get_photo_by_cin_and_msg_id(channel_id=new_post.channel_id,
@@ -39,21 +33,18 @@ class Notification:
                         photo = FSInputFile(path=photo_data['data'].photo_path)
                         await bot.send_photo(settings.admin.id_, photo=photo,
                                              caption="⚠️ Новый пост на проверку: ⚠️\n\n"
-                                                     f"{new_post.text}\n\n"
-                                                     f"❗️ Оригинальный тектс ❗️\n\n"
-                                                     f'<span class="tg-spoiler">{text}</span>',
-                                             reply_markup=approve_message(new_post),
-                                             parse_mode="HTML")
+                                                     f"{ new_post.text}\n\n"
+                                                     f"{fmt.text(settings.project_const.title, fmt.hide_link(settings.project_const.main_url))}",
+                                             reply_markup=approve_message(new_post))
 
                 else:
 
                     await bot.send_message(settings.admin.id_,
                                            text="⚠️ Новый пост на проверку: ⚠️\n\n"
                                                 f"{new_post.text}\n\n"
-                                                f"❗️ Оригинальный тектс ❗️\n\n"
-                                                f'<span class="tg-spoiler">{text}</span>',
+                                                f"{fmt.text(settings.project_const.title, fmt.hide_link(settings.project_const.main_url))}",
                                            reply_markup=approve_message(new_post),
-                                           parse_mode="HTML")
+                                           disable_web_page_preview=True)
 
             for post in update_data:
                 for k, v in post.items():

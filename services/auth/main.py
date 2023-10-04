@@ -37,6 +37,10 @@ class Auth:
                 await self.view.delete_message(msg_id=user.active_msg_id)
                 await self.view.print_message(text=messages['admin'], kb=admin_menu)
             elif user.id == settings.admin.id_:
+                if user.is_admin is False:
+                    user.is_admin = True
+                    await self.cache.update_user(user=user)
+
                 await self.view.delete_message(msg_id=user.active_msg_id)
                 await self.view.print_message(text=messages['admin'], kb=admin_menu)
             else:

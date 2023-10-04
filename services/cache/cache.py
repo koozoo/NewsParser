@@ -1,5 +1,6 @@
 from database.methods.main import Database
 from database.models.user import UserData
+from database.models.posts import PostData
 from redis_.main import RedisClient
 
 
@@ -23,7 +24,7 @@ class Cache:
                             email=user['email'])
         else:
             user = await self._database.get_user(user_id=user_id)
-            await self._redis_cli.set_cache_user_by_id(user_id=user_id, data=user.to_dict())
+            self._redis_cli.set_cache_user_by_id(user_id=user_id, data=user.to_dict())
 
             user = await self._redis_cli.get_cache_user_by_id(user_id=user_id)
 
@@ -36,7 +37,7 @@ class Cache:
                             email=user['email'])
 
     async def _set_user_data(self, user: UserData):
-        await self._redis_cli.set_cache_user_by_id(user_id=user.id, data=user.to_dict())
+        self._redis_cli.set_cache_user_by_id(user_id=user.id, data=user.to_dict())
         return await self.get_user(user_id=user.id)
 
     async def update_user(self, user: UserData):
@@ -59,3 +60,29 @@ class Cache:
 
         return result_data
 
+    async def update_state_admins(self):
+        self._redis_cli.clean_obj(key='admins')
+        admins = await self._database.get_all_admin_with_main_admin()
+        for admin_id in admins:
+            self._redis_cli.set_all_admins_id(data=admin_id)
+
+    async def get_post(self, message_id: int, channel_id: int):
+        post = self._redis_cli.get_post_(message_id=message_id, channel_id=channel_id)
+
+        if post:
+            for k, v in post.items():
+                if k == 'reject':
+                    post[k] = (False, True)[v == '1']
+                elif k == 'published':
+                    post[k] = (False, True)[v == '1']
+                elif k == 'media':
+                    post[k] = {}
+                else:
+                    pass
+
+            return PostData.dict_to_post_data(data=post)
+        else:
+            post = await self._database.get_post_(message_id=message_id, channel_id=channel_id)
+            self._redis_cli.set_post_(message_id=message_id, channel_id=channel_id, data=post[0].to_dict())
+
+            return await self.get_post(message_id=message_id, channel_id=channel_id)
