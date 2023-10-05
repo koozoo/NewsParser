@@ -32,12 +32,13 @@ class RedisClient:
                                db=self.db,
                                decode_responses=True)
 
-    async def set_all_messages_id(self, channel_id: int,  data: list[int]):
+    def set_all_messages_id(self, channel_id: int,  data: list[int]):
         with self._connect_redis() as redis_cli:
             for post in data:
-                await redis_cli.rpush(f"messages_id:{channel_id}", post)
+                redis_cli.rpush(f"messages_id:{channel_id}", post)
+                redis_cli.expire(f"messages_id:{channel_id}", 2400)
 
-    async def get_all_messages_id(self, channel_id: int):
+    def get_all_messages_id(self, channel_id: int):
         with self._connect_redis() as redis_cli:
             data = redis_cli.lrange(f"messages_id:{channel_id}", 0, -1)
             return data
@@ -65,6 +66,7 @@ class RedisClient:
                     pass
 
                 redis_cli.hset(f"user:{user_id}", key=key, value=value)
+                redis_cli.expire(f"user:{user_id}", 2400)
 
     def get_all_admins_id(self):
         with self._connect_redis() as redis_cli:
