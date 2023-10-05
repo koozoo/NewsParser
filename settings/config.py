@@ -152,11 +152,16 @@ class Settings:
         return AdminData(id_=admin_id, email=admin_email)
 
     def _get_project_const(self) -> ProjectData:
+        root_path = os.environ['PWD']
+
+        if not os.path.exists(f"{root_path}/static"):
+            os.mkdir(f"{root_path}/static")
+
         return ProjectData(main_url="https://telegram.org/apps",
                            channel_id=1855021356,
                            title="@news_parser_test2",
                            default_prompt="",
-                           root=os.environ['PWD'])
+                           root=root_path)
 
     def get_settings(self) -> SettingsData:
         return SettingsData(database_=self._get_config_db(),

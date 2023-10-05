@@ -1,3 +1,8 @@
+import logging
+import os
+import shutil
+import datetime as dt
+
 from aiogram import Bot
 from aiogram.types import Message
 from database.methods.main import Database
@@ -7,6 +12,7 @@ from .telegram_parser.main import TelegramParser
 from .auth.main import Auth
 from .web_parser.main import WebParser
 from worker.tasks import add_openai_job
+from settings.config import settings
 
 
 class Service:
@@ -18,7 +24,7 @@ class Service:
     async def init_parsing(self, type_: str):
 
         if type_ == "telegram":
-            tool_entity = await self._start_telegram_parser()
+            entity = await self._start_telegram_parser()
         elif type_ == "web":
             ...
         else:
@@ -46,3 +52,20 @@ class Service:
 
         notification = Notification(type_='approve_message', data=posts_for_notification["posts"])
         await notification.send_message(bot=bot)
+
+    async def init_delete_photo(self):
+        days_to_del = 3
+        root_path = settings.project_const.root
+
+        all_static_folder = os.listdir(path=f"{root_path}/static")
+
+        for folder in all_static_folder:
+            date_format = '%Y-%m-%d'
+            date_folder = dt.datetime.strptime(folder, date_format)
+            date_current = dt.datetime.today()
+
+            diff_days = date_current - date_folder
+
+            if int(diff_days.days) > days_to_del:
+                shutil.rmtree(path=f"{root_path}/static/{folder}")
+                logging.info(f"Папка {folder} удачно удалена.")

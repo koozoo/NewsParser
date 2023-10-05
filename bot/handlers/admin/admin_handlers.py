@@ -8,7 +8,7 @@ from .aprove_post import ApprovePost, EditAction, EditPost
 from .access_rights_management import AccessManagement, AccessManagementFSM, AccessAction
 from .delete_channel import InterfaceFsmDelete, DeleteAction
 from .update_prompt import PromptManagementFSM, PromptAction
-from .channel_ import ChannelMenu
+from .channel_ import ChannelMenu, GetChannelAction, InterfaceGetChannel
 from .update_prompt import Prompt
 
 
@@ -31,9 +31,9 @@ async def init_update_prompt(call: CallbackQuery, state: FSMContext):
     await entity.init_prompt(state=state)
 
 
-async def init_channel(call: CallbackQuery):
+async def init_channel(call: CallbackQuery, state: FSMContext):
     channel_menu_entity = ChannelMenu(context=call)
-    await channel_menu_entity.start()
+    await channel_menu_entity.start(state=state)
 
 
 async def close(call: CallbackQuery):
@@ -105,4 +105,15 @@ async def register_admin_handlers(dp: Dispatcher):
 
     dp.message.register(EditPost.finish_process,
                         EditAction.finish,
+                        lambda msg: msg.text.casefold() in ["да", "нет"])
+
+    # FSM FIND URL EVENT
+    dp.message.register(InterfaceGetChannel.filed_link_process,
+                        GetChannelAction.link,
+                        lambda msg: "https://t.me" not in msg.text)
+    dp.message.register(InterfaceGetChannel.link_process,
+                        GetChannelAction.link,
+                        lambda msg: "https://t.me" in msg.text)
+    dp.message.register(InterfaceGetChannel.finish_process,
+                        GetChannelAction.finish,
                         lambda msg: msg.text.casefold() in ["да", "нет"])

@@ -126,10 +126,11 @@ class TelegramParser:
         return await self._get_type_entity(message_data, data)
 
     async def _download_media(self, media_entity: MessageMediaWebPage | MessageMediaPhoto, path: str):
+
         if isinstance(media_entity.media, MessageMediaPhoto):
             filepath = path + f"/{media_entity.media.photo.id}.jpg"
-            if os.path.exists(filepath):
 
+            if os.path.exists(filepath):
                 return "none"
             else:
                 await self._cli.download_media(media_entity.media, path + f"/{media_entity.media.photo.id}.jpg")
@@ -166,7 +167,6 @@ class TelegramParser:
         media_data = []
 
         async for msg in self._cli.iter_messages(entity=entity, limit=limit):
-            # TODO очистить от print
             try:
                 post_ = await self._create_post_entity(message_data=msg.to_dict())
 
@@ -174,8 +174,9 @@ class TelegramParser:
                     if post_.type == "photo" or post_.type == "web_page":
 
                         photo_path = await self._save_photo(photo_entity=msg)
-                        print("photo path in telegram_parser -> _get_limited_msg -> photo_path ", photo_path)
-                        media_data.append(await self._create_media(post_, photo_path=photo_path))
+
+                        if photo_path != 'none':
+                            media_data.append(await self._create_media(post_, photo_path=photo_path))
 
                     list_post_data.append(post_)
 
@@ -194,8 +195,10 @@ class TelegramParser:
         if entity is not None:
             return await self._cli(GetFullChannelRequest(channel=entity))
         else:
+            logging.info("in entity")
             entity_ = await self._cli.get_entity(entity=link)
-            return await self._cli(GetFullChannelRequest(channel=entity_))
+            print("entity in get_full_info", entity_)
+            return await self._cli(GetFullChannelRequest(entity_))
 
     async def start_parsing(self):
 

@@ -1,3 +1,5 @@
+import logging
+
 from aiogram.types import CallbackQuery, Message
 
 from services.cache.cache import Cache
@@ -15,13 +17,14 @@ class View:
 
         if user.is_admin:
             if kwarg:
-                print(kwarg)
+                pass
             else:
                 try:
-                    await self.context.bot.edit_message_text(chat_id=self.chat_id, message_id=user.active_msg_id, text=text,
+                    await self.context.bot.edit_message_text(chat_id=self.chat_id, message_id=user.active_msg_id,
+                                                             text=text,
                                                              reply_markup=kb(user.active_msg_id))
                 except Exception as e:
-                    print(e)
+                    logging.info(f"ViewError: {e}")
                     await self.delete_message(user.active_msg_id)
                     message_data = await self.context.bot.send_message(chat_id=self.chat_id, text=text,
                                                                        reply_markup=kb(user.active_msg_id + 1))
@@ -37,7 +40,7 @@ class View:
                                                               'ССЫЛКА ...\n'
                                                               'Контакты: ...')
             except Exception as e:
-                print(e)
+                logging.info(f"ViewError: {e}")
                 await self.delete_message(user.active_msg_id)
                 message_data = await self.context.bot.send_message(chat_id=self.chat_id, text=text,
                                                                    reply_markup=kb(user.active_msg_id + 1))
@@ -51,7 +54,7 @@ class View:
             try:
                 await self.context.bot.delete_message(chat_id=self.chat_id, message_id=msg_id)
             except Exception as e:
-                print(e)
+                logging.info(f"ViewError: {e}")
         else:
             try:
                 if isinstance(self.context, Message):
@@ -60,4 +63,4 @@ class View:
                     await self.context.message.delete()
 
             except Exception as e:
-                print(e)
+                logging.info(f"ViewError: {e}")

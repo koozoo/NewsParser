@@ -26,7 +26,6 @@ class RedisClient:
                                decode_responses=True)
 
         else:
-            print("redis is None")
             return redis.Redis(host=self.host,
                                port=self.port,
                                db=self.db,

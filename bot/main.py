@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import Dispatcher, Bot
+from apscheduler.triggers.cron import CronTrigger
 
 from settings.config import settings
 from bot.handlers import register_handlers
@@ -22,6 +23,7 @@ async def _register_global_task(**kwarg):
     scheduler.add_job(func=service_entity.init_open_ai, trigger="cron", minute="*/1")
     scheduler.add_job(func=service_entity.init_approve_notification, trigger="cron", minute="*/1",
                       kwargs={"bot": kwarg['bot']})
+    scheduler.add_job(service_entity.init_delete_photo, CronTrigger.from_crontab('0 1 * * *'))
     # scheduler.add_job(func=service_entity.init_parsing, trigger="cron", minute="*/1", kwargs={"type_": "web"})
 
 
@@ -35,7 +37,7 @@ async def set_config():
 
 
 async def start_bot():
-    # await setup_logging()
+    await setup_logging()
     bot = Bot(token=settings.bot.token, parse_mode='HTML')
 
     dp = Dispatcher()

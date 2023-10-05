@@ -14,7 +14,7 @@ import loguru
 
 
 LOG_LEVEL = logging.getLevelName(
-    os.environ.get("OWS_AP_LOG_LEVEL", "DEBUG")
+    os.environ.get("OWS_AP_LOG_LEVEL", "INFO")
 )
 FORMAT_PLAIN = (
     "{level: <8} | "
@@ -52,7 +52,6 @@ async def setup_logging():
     # Intercept everything at the root logger
     logging.root.handlers = [InterceptHandler()]
     logging.root.setLevel(LOG_LEVEL)
-
     # Remove every other logger's handlers and propagate to root logger
     for name in logging.root.manager.loggerDict.keys():
         logging.getLogger(name).handlers = []
