@@ -3,7 +3,7 @@ import functools
 
 from database.methods.main import Database
 from services.openai.main import OpenAi
-from .main import openai_worker
+from .celery import openai_worker
 
 
 def run_async_task(func):

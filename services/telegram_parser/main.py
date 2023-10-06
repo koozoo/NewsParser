@@ -113,7 +113,6 @@ class TelegramParser:
             return PostData.dict_to_post_data(data=data)
         else:
             data['type'] = 'unknown'
-            print(msg_data)
             return PostData.dict_to_post_data(data=data)
 
     async def _create_post_entity(self, message_data: dict) -> PostData:
@@ -146,7 +145,7 @@ class TelegramParser:
                                                path + f"/{media_entity.media.webpage.photo.id}.jpg")
                 return filepath
         else:
-            print("UNKNOWN TYPE")
+            logging.info(f"TelegramParser: Type not found")
 
     async def _save_photo(self, photo_entity) -> str:
         root_path = settings.project_const.root
@@ -181,7 +180,7 @@ class TelegramParser:
                     list_post_data.append(post_)
 
             except Exception as e:
-                logging.info(f"Error in get_limited_message: {e}")
+                logging.info(f"TelegramParserError: {e}")
                 continue
 
         if media_data:
@@ -197,7 +196,6 @@ class TelegramParser:
         else:
             logging.info("in entity")
             entity_ = await self._cli.get_entity(entity=link)
-            print("entity in get_full_info", entity_)
             return await self._cli(GetFullChannelRequest(entity_))
 
     async def start_parsing(self):
@@ -217,6 +215,6 @@ class TelegramParser:
                         await self._get_limited_messages(entity=entity)
 
                 except Exception as e:
-                    logging.info(e)
+                    logging.info(f"TelegramParserError: {e}")
         else:
             print("We not find channels for parsing")

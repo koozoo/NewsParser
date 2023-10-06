@@ -2,39 +2,47 @@ version: "3.9"
 
 services:
   db:
+    container_name: news_bot_db
     image: "postgres"
     restart: always
     volumes:
       - /app/news/_data:/var/lib/postgresql/data
     ports:
-      - "5445:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=4682233
-    container_name: news_bot_db
   redis:
+    container_name: news_bot_cache
     image: "redis:alpine"
     restart: always
     ports:
-      - "6381:6379"
-
+      - "6379:6379"
     environment:
       - REDIS_REPLICATION_MODE=master
-
-    container_name: news_bot_cache
+  celery:
+    container_name: worker_bot_app
+    image: worker
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    command: bash -c "celery -A worker.celery.openai_worker worker --concurrency=1 -l INFO"
+    restart: always
+    depends_on:
+      - redis
   app:
     container_name: news_bot_app
     image: app
     build:
       context: .
-      dockerfile: Dockerfile
-    command: bash -c "python run.py"
-#    command: bash -c "alembic revision --autogenerate -m "init" &&  alembic upgrade heads && python run.py"
+      dockerfile: app.Dockerfile
+    command: bash -c "alembic revision --autogenerate -m "init" && alembic upgrade head && python run.py"
     restart: always
     depends_on:
       - db
       - redis
+      - celery
 
 networks:
   node_net:
